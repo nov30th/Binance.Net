@@ -3,6 +3,8 @@ title: FAQ
 nav_order: 5
 ---
 
+See also [CryptoExchange.Net FAQ](https://jkorf.github.io/CryptoExchange.Net/FAQ.html)
+
 ### The user data stream stops sending updates after x time 
 You're probably not calling the KeepAliveUserStreamAsync periodically to keep the user stream alive.
 

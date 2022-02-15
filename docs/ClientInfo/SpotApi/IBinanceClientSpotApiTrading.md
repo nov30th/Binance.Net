@@ -240,6 +240,64 @@ Task<WebCallResult<BinanceOrderBase>> CancelOrderAsync(string symbol, long? orde
 
 ***
 
+## GetC2CTradeHistoryAsync  
+
+[https://binance-docs.github.io/apidocs/spot/en/#get-c2c-trade-history-user_data](https://binance-docs.github.io/apidocs/spot/en/#get-c2c-trade-history-user_data)  
+<p>
+
+*Get Customer to Customer trade history*  
+
+```csharp  
+var client = new BinanceClient();  
+var result = await client.SpotApi.Trading.GetC2CTradeHistoryAsync(/* parameters */);  
+```  
+
+```csharp  
+Task<WebCallResult<IEnumerable<BinanceC2CUserTrade>>> GetC2CTradeHistoryAsync(OrderSide side, DateTime? startTime = default, DateTime? endTime = default, int? page = default, int? pageSize = default, long? receiveWindow = default, CancellationToken ct = default);  
+```  
+
+|Parameter|Description|
+|---|---|
+|side|Trade side|
+|_[Optional]_ startTime|Filter by start time|
+|_[Optional]_ endTime|Filter by end time|
+|_[Optional]_ page|The page|
+|_[Optional]_ pageSize|The page size|
+|_[Optional]_ receiveWindow|The receive window for which this request is active. When the request takes longer than this to complete the server will reject the request|
+|_[Optional]_ ct|Cancellation token|
+
+</p>
+
+***
+
+## GetConvertTradeHistoryAsync  
+
+[https://binance-docs.github.io/apidocs/spot/en/#get-convert-trade-history-user_data](https://binance-docs.github.io/apidocs/spot/en/#get-convert-trade-history-user_data)  
+<p>
+
+*Get convert trade history*  
+
+```csharp  
+var client = new BinanceClient();  
+var result = await client.SpotApi.Trading.GetConvertTradeHistoryAsync(/* parameters */);  
+```  
+
+```csharp  
+Task<WebCallResult<BinanceListResult<BinanceConvertTrade>>> GetConvertTradeHistoryAsync(DateTime startTime, DateTime endTime, int? limit = default, long? receiveWindow = default, CancellationToken ct = default);  
+```  
+
+|Parameter|Description|
+|---|---|
+|startTime|Filter by start time|
+|endTime|Filter by end time|
+|_[Optional]_ limit|Max amount of results|
+|_[Optional]_ receiveWindow|The receive window for which this request is active. When the request takes longer than this to complete the server will reject the request|
+|_[Optional]_ ct|Cancellation token|
+
+</p>
+
+***
+
 ## GetLeveragedTokensRedemptionRecordsAsync  
 
 [https://binance-docs.github.io/apidocs/spot/en/#query-redemption-record-user_data](https://binance-docs.github.io/apidocs/spot/en/#query-redemption-record-user_data)  
@@ -781,6 +839,34 @@ Task<WebCallResult<IEnumerable<BinanceOrder>>> GetOrdersAsync(string symbol, lon
 |_[Optional]_ startTime|If set, only orders placed after this time will be returned|
 |_[Optional]_ endTime|If set, only orders placed before this time will be returned|
 |_[Optional]_ limit|Max number of results|
+|_[Optional]_ receiveWindow|The receive window for which this request is active. When the request takes longer than this to complete the server will reject the request|
+|_[Optional]_ ct|Cancellation token|
+
+</p>
+
+***
+
+## GetPayTradeHistoryAsync  
+
+[https://binance-docs.github.io/apidocs/spot/en/#get-pay-trade-history-user_data](https://binance-docs.github.io/apidocs/spot/en/#get-pay-trade-history-user_data)  
+<p>
+
+*Get pay trade history*  
+
+```csharp  
+var client = new BinanceClient();  
+var result = await client.SpotApi.Trading.GetPayTradeHistoryAsync();  
+```  
+
+```csharp  
+Task<WebCallResult<IEnumerable<BinancePayTrade>>> GetPayTradeHistoryAsync(DateTime? startTime = default, DateTime? endTime = default, int? limit = default, long? receiveWindow = default, CancellationToken ct = default);  
+```  
+
+|Parameter|Description|
+|---|---|
+|_[Optional]_ startTime|Filter by start time|
+|_[Optional]_ endTime|Filter by end time|
+|_[Optional]_ limit|Max amount of results|
 |_[Optional]_ receiveWindow|The receive window for which this request is active. When the request takes longer than this to complete the server will reject the request|
 |_[Optional]_ ct|Cancellation token|
 

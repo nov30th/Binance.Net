@@ -302,6 +302,30 @@ Task<WebCallResult<BinanceQueryRecords<BinanceDividendRecord>>> GetAssetDividend
 
 ***
 
+## GetAssetsForDustTransferAsync  
+
+<p>
+
+*Get assets that can be converted to BNB*  
+
+```csharp  
+var client = new BinanceClient();  
+var result = await client.SpotApi.Account.GetAssetsForDustTransferAsync();  
+```  
+
+```csharp  
+Task<WebCallResult<BinanceElligableDusts>> GetAssetsForDustTransferAsync(int? receiveWindow = default, CancellationToken ct = default);  
+```  
+
+|Parameter|Description|
+|---|---|
+|_[Optional]_ receiveWindow|The receive window for which this request is active. When the request takes longer than this to complete the server will reject the request|
+|_[Optional]_ ct|Cancellation token|
+
+</p>
+
+***
+
 ## GetBnbBurnStatusAsync  
 
 [https://binance-docs.github.io/apidocs/spot/en/#get-bnb-burn-status-user_data](https://binance-docs.github.io/apidocs/spot/en/#get-bnb-burn-status-user_data)  
@@ -951,6 +975,34 @@ Task<WebCallResult<IEnumerable<BinanceOrderRateLimit>>> GetOrderRateLimitStatusA
 
 |Parameter|Description|
 |---|---|
+|_[Optional]_ receiveWindow|The receive window for which this request is active. When the request takes longer than this to complete the server will reject the request|
+|_[Optional]_ ct|Cancellation token|
+
+</p>
+
+***
+
+## GetRebateHistoryAsync  
+
+[https://binance-docs.github.io/apidocs/spot/en/#get-spot-rebate-history-records-user_data](https://binance-docs.github.io/apidocs/spot/en/#get-spot-rebate-history-records-user_data)  
+<p>
+
+*Get rebate history*  
+
+```csharp  
+var client = new BinanceClient();  
+var result = await client.SpotApi.Account.GetRebateHistoryAsync();  
+```  
+
+```csharp  
+Task<WebCallResult<BinanceRebateWrapper>> GetRebateHistoryAsync(DateTime? startTime = default, DateTime? endTime = default, int? page = default, long? receiveWindow = default, CancellationToken ct = default);  
+```  
+
+|Parameter|Description|
+|---|---|
+|_[Optional]_ startTime|Filter by start time|
+|_[Optional]_ endTime|Filter by end time|
+|_[Optional]_ page|Results per page|
 |_[Optional]_ receiveWindow|The receive window for which this request is active. When the request takes longer than this to complete the server will reject the request|
 |_[Optional]_ ct|Cancellation token|
 
