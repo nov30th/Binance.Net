@@ -12,6 +12,7 @@ namespace Binance.Net.Objects.Models.Spot.SubAccountData
         /// <summary>
         /// Transactions
         /// </summary>
+        [JsonProperty("result")]
         public IEnumerable<BinanceSubAccountUniversalTransferTransaction> Transactions { get; set; } =
             new List<BinanceSubAccountUniversalTransferTransaction>();
 
@@ -25,7 +26,7 @@ namespace Binance.Net.Objects.Models.Spot.SubAccountData
         /// <summary>
         /// Transaction id
         /// </summary>
-        [JsonProperty("transId")]
+        [JsonProperty("tranId")]
         public long TransactionId { get; set; }
 
         /// <summary>
