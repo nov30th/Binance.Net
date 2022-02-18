@@ -20,6 +20,7 @@ using CryptoExchange.Net.Logging;
 using Binance.Net.Interfaces.Clients.SpotApi;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.CommonObjects;
+using CryptoExchange.Net.Interfaces.CommonClients;
 
 namespace Binance.Net.Clients.SpotApi
 {
@@ -324,12 +325,12 @@ namespace Binance.Net.Clients.SpotApi
             OnOrderCanceled?.Invoke(id);
         }
 
-        async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string? accountId, CancellationToken ct)
+        async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string? accountId, string? clientOrderId, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(symbol))
                 throw new ArgumentException(nameof(symbol) + " required for Binance " + nameof(ISpotClient.PlaceOrderAsync), nameof(symbol));
 
-            var order = await Trading.PlaceOrderAsync(symbol, GetOrderSide(side), GetOrderType(type), quantity, price: price, timeInForce: type == CommonOrderType.Limit ? TimeInForce.GoodTillCanceled : (TimeInForce?)null, ct: ct).ConfigureAwait(false);
+            var order = await Trading.PlaceOrderAsync(symbol, GetOrderSide(side), GetOrderType(type), quantity, price: price, timeInForce: type == CommonOrderType.Limit ? TimeInForce.GoodTillCanceled : (TimeInForce?)null, newClientOrderId: clientOrderId, ct: ct).ConfigureAwait(false);
             if(!order)
                 return order.As<OrderId>(null);
 
