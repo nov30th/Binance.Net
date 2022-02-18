@@ -20,59 +20,21 @@ Alternatively, sponsor me on Github using [Github Sponsors](https://github.com/s
 A Discord server is available [here](https://discord.gg/MSpeEtSY8t). For discussion and/or questions around the CryptoExchange.Net and implementation libraries, feel free to join.
 
 ## Release notes
-* Version 8.0.0-beta8 - 11 Feb 2022
-    * Fixed UniversalTransferType enum
+* Version 8.0.0 - 18 Feb 2022
+	* Added Github.io page for documentation: https://jkorf.github.io/Binance.Net/
+	* Added unit tests for parsing the returned JSON for each endpoint and subscription
+	* Added AddBinance extension method on IServiceCollection for easy dependency injection
+	* Added URL reference to API endpoint documentation for each endpoint
+	* Added default rate limiter
 
-* Version 8.0.0-beta7 - 09 Feb 2022
-    * Added GetAssetsForDusTransferAsync endpoint
-    * Added GetConvertTradeHistoryAsync endpoint
-    * Added GetC2CTradeHistoryAsync endpoint
-    * Added GetPayTradeHistoryAsync endpoint
-    * Updated CryptoExchange.Net
+	* Refactored client structure to be consistent across exchange implementations
+	* Renamed various properties to be consistent across exchange implementations
 
-* Version 8.0.0-beta6 - 05 Feb 2022
-    * Fixed BuyerIsMaker mapping on user trade update
-    * Updated CryptoExchange.Net, adding Cancellation token support for Common interface and SymbolOrderBook
+	* Cleaned up project structure
+	* Fixed various models
 
-* Version 8.0.0-beta5 - 02 Feb 2022
-    * Changed UpdateTime on BinancePositionModel to nullable
-    * Updated CryptoExchange.Net to fix deserialization error when deserializing string "0" to a non-nullable DateTime property
-
-* Version 8.0.0-beta4 - 31 Jan 2022
-    * Updated CryptoExchange.Net
-
-* Version 8.0.0-beta3 - 30 Jan 2022
-    * Fixed FuturesOrderType serialization
-    * Added SubAccountFuturesDetails V2 and SubAccountFuturesRiskV2 endpoints
-
-* Version 8.0.0-beta2 - 24 Jan 2022
-    * Split OrderType enum in SpotOrderType and FuturesOrderType enums to prevent confusion
-    * Updated CryptoExchange.Net
-
-* Version 8.0.0-beta1 - 15 Jan 2022
-    * Updated CryptoExchange.Net
-
-* Version 8.0.0-alpha7 - 07 Jan 2022
-    * Fixed issue with options not being copied correctly
-
-* Version 8.0.0-alpha6 - 07 Jan 2022
-    * Updated CrytpoExchange.Net
-    * Added optional parameter for socket client lifetime in AddBinance
-
-* Version 8.0.0-alpha5 - 03 Jan 2022
-    * Updated CryptoExchange.Net
-
-* Version 8.0.0-alpha4 - 01 Jan 2022
-    * New comon implementation, added AddBinance extension method
-
-* Version 8.0.0-alpha3 - 27 Dec 2021
-    * Updated CryptoExchange.Net, small changes
-
-* Version 8.0.0-alpha2 - 21 Dec 2021
-    * Update to new CryptoExchange.Net version
-
-* Version 8.0.0-alpha1 - 07 Dec 2021
-    * Initial version new CryptoExchange.Net. More documentation coming soon
+	* Updated CryptoExchange.Net, see https://github.com/JKorf/CryptoExchange.Net#release-notes
+	* See https://jkorf.github.io/Binance.Net/MigrationGuide.html for additional notes for updating from V7 to V8
 
 * Version 7.2.5 - 08 Oct 2021
     * Updated CryptoExchange.Net to fix some socket issues
