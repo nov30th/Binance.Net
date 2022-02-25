@@ -75,6 +75,11 @@
         <member name="T:Binance.Net.Clients.BinanceClient">
             <inheritdoc cref="T:Binance.Net.Interfaces.Clients.IBinanceClient" />
         </member>
+        <member name="F:Binance.Net.Clients.BinanceClient.defaultSerializer">
+            <summary>
+            A default serializer
+            </summary>
+        </member>
         <member name="P:Binance.Net.Clients.BinanceClient.GeneralApi">
             <inheritdoc />
         </member>
@@ -104,11 +109,16 @@
             </summary>
             <param name="options">Options to use as default</param>
         </member>
-        <member name="M:Binance.Net.Clients.BinanceClient.ParseErrorResponse(Newtonsoft.Json.Linq.JToken)">
+        <member name="M:Binance.Net.Clients.BinanceClient.ParseError(System.String)">
             <inheritdoc />
         </member>
         <member name="T:Binance.Net.Clients.BinanceSocketClient">
             <inheritdoc cref="T:Binance.Net.Interfaces.Clients.IBinanceSocketClient" />
+        </member>
+        <member name="F:Binance.Net.Clients.BinanceSocketClient.defaultSerializer">
+            <summary>
+            A default serializer
+            </summary>
         </member>
         <member name="P:Binance.Net.Clients.BinanceSocketClient.SpotStreams">
             <inheritdoc />
@@ -1254,7 +1264,7 @@
         <member name="T:Binance.Net.Clients.SpotApi.BinanceSocketClientSpotStreams">
             <inheritdoc />
         </member>
-        <member name="M:Binance.Net.Clients.SpotApi.BinanceSocketClientSpotStreams.#ctor(CryptoExchange.Net.Logging.Log,Binance.Net.Clients.BinanceSocketClient,Binance.Net.Objects.BinanceSocketClientOptions)">
+        <member name="M:Binance.Net.Clients.SpotApi.BinanceSocketClientSpotStreams.#ctor(CryptoExchange.Net.Logging.Log,Binance.Net.Clients.BinanceSocketClient,Binance.Net.Objects.BinanceSocketClientOptions,CryptoExchange.Net.DataProcessors.IDataConverter)">
             <summary>
             Create a new instance of BinanceSocketClientSpot with default options
             </summary>
@@ -1565,7 +1575,7 @@
             Client providing access to the Binance Usd futures websocket Api
             </summary>
         </member>
-        <member name="M:Binance.Net.Clients.UsdFuturesApi.BinanceSocketClientUsdFuturesStreams.#ctor(CryptoExchange.Net.Logging.Log,Binance.Net.Clients.BinanceSocketClient,Binance.Net.Objects.BinanceSocketClientOptions)">
+        <member name="M:Binance.Net.Clients.UsdFuturesApi.BinanceSocketClientUsdFuturesStreams.#ctor(CryptoExchange.Net.Logging.Log,Binance.Net.Clients.BinanceSocketClient,Binance.Net.Objects.BinanceSocketClientOptions,CryptoExchange.Net.DataProcessors.IDataConverter)">
             <summary>
             Create a new instance of BinanceSocketClientSpot with default options
             </summary>

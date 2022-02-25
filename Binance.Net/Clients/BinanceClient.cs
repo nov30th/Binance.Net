@@ -16,12 +16,25 @@ using Binance.Net.Clients.GeneralApi;
 using Binance.Net.Clients.SpotApi;
 using Binance.Net.Clients.UsdFuturesApi;
 using Binance.Net.Clients.CoinFuturesApi;
+using CryptoExchange.Net.DataProcessors;
+using Newtonsoft.Json;
+using System.Globalization;
+using System.Net;
 
 namespace Binance.Net.Clients
 {
     /// <inheritdoc cref="IBinanceClient" />
     public class BinanceClient : BaseRestClient, IBinanceClient
     {
+        /// <summary>
+        /// A default serializer
+        /// </summary>
+        private static readonly JsonSerializer defaultSerializer = JsonSerializer.Create(new JsonSerializerSettings
+        {
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+            Culture = CultureInfo.InvariantCulture
+        });
+
         #region Api clients
 
         /// <inheritdoc />
@@ -49,10 +62,10 @@ namespace Binance.Net.Clients
         /// <param name="options">The options to use for this client</param>
         public BinanceClient(BinanceClientOptions options) : base("Binance", options)
         {
-            GeneralApi = AddApiClient(new BinanceClientGeneralApi(log, this, options));
-            SpotApi = AddApiClient(new BinanceClientSpotApi(log, this, options));
-            UsdFuturesApi = AddApiClient(new BinanceClientUsdFuturesApi(log, this, options));
-            CoinFuturesApi = AddApiClient(new BinanceClientCoinFuturesApi(log, this, options));
+            GeneralApi = AddApiClient(new BinanceClientGeneralApi(log, this, options, new JsonDataConverter(log, defaultSerializer)));
+            SpotApi = AddApiClient(new BinanceClientSpotApi(log, this, options, new JsonDataConverter(log, defaultSerializer)));
+            UsdFuturesApi = AddApiClient(new BinanceClientUsdFuturesApi(log, this, options, new JsonDataConverter(log, defaultSerializer)));
+            CoinFuturesApi = AddApiClient(new BinanceClientCoinFuturesApi(log, this, options, new JsonDataConverter(log, defaultSerializer)));
 
             requestBodyEmptyContent = "";
             requestBodyFormat = RequestBodyFormat.FormData;
@@ -70,18 +83,22 @@ namespace Binance.Net.Clients
         }
 
         /// <inheritdoc />
-        protected override Error ParseErrorResponse(JToken error)
+        protected override ServerError? TryParseError(HttpStatusCode statusCode, string data)
         {
-            if (!error.HasValues)
-                return new ServerError(error.ToString());
+            if (string.IsNullOrEmpty(data))
+                return new ServerError((int)statusCode, "No data");
 
-            if (error["msg"] == null && error["code"] == null)
-                return new ServerError(error.ToString());
+            var tokenData = data.ToJToken(log);
+            if(tokenData == null || !tokenData.HasValues)
+                return new ServerError((int)statusCode, data);
 
-            if (error["msg"] != null && error["code"] == null)
-                return new ServerError((string)error["msg"]!);
+            if (tokenData["msg"] == null && tokenData["code"] == null)
+                return new ServerError((int)statusCode, data);
 
-            return new ServerError((int)error["code"]!, (string)error["msg"]!);
+            if (tokenData["msg"] != null && tokenData["code"] == null)
+                return new ServerError((int)statusCode, (string)tokenData["msg"]!);
+
+            return new ServerError((int)tokenData["code"]!, (string)tokenData["msg"]!);
         }
 
         internal Task<WebCallResult<T>> SendRequestInternal<T>(RestApiClient apiClient, Uri uri, HttpMethod method, CancellationToken cancellationToken,

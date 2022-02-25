@@ -19,6 +19,7 @@ using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.CommonObjects;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Interfaces.CommonClients;
+using CryptoExchange.Net.DataProcessors;
 
 namespace Binance.Net.Clients.CoinFuturesApi
 {
@@ -58,8 +59,8 @@ namespace Binance.Net.Clients.CoinFuturesApi
         public event Action<OrderId>? OnOrderCanceled;
 
         #region constructor/destructor
-        internal BinanceClientCoinFuturesApi(Log log, BinanceClient baseClient, BinanceClientOptions options) :
-            base(options, options.CoinFuturesApiOptions)
+        internal BinanceClientCoinFuturesApi(Log log, BinanceClient baseClient, BinanceClientOptions options, IDataConverter converter) :
+            base(options, options.CoinFuturesApiOptions, converter)
         {
             _log = log;
             Options = options;

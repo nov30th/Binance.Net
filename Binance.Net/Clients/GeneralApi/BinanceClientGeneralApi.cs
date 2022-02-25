@@ -13,6 +13,7 @@ using Binance.Net.Interfaces.Clients.GeneralApi;
 using Binance.Net.Clients.SpotApi;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
+using CryptoExchange.Net.DataProcessors;
 
 namespace Binance.Net.Clients.GeneralApi
 {
@@ -40,7 +41,7 @@ namespace Binance.Net.Clients.GeneralApi
 
         #region constructor/destructor
 
-        internal BinanceClientGeneralApi(Log log, BinanceClient baseClient, BinanceClientOptions options) : base(options, options.SpotApiOptions)
+        internal BinanceClientGeneralApi(Log log, BinanceClient baseClient, BinanceClientOptions options, IDataConverter converter) : base(options, options.SpotApiOptions, converter)
         {
             Options = options;
             _baseClient = baseClient;

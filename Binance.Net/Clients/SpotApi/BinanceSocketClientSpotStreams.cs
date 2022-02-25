@@ -14,6 +14,7 @@ using Binance.Net.Objects.Models.Spot;
 using Binance.Net.Objects.Models.Spot.Socket;
 using CryptoExchange.Net;
 using CryptoExchange.Net.Authentication;
+using CryptoExchange.Net.DataProcessors;
 using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Sockets;
@@ -53,8 +54,8 @@ namespace Binance.Net.Clients.SpotApi
         /// <summary>
         /// Create a new instance of BinanceSocketClientSpot with default options
         /// </summary>
-        public BinanceSocketClientSpotStreams(Log log, BinanceSocketClient baseClient, BinanceSocketClientOptions options) :
-            base(options, options.SpotStreamsOptions)
+        public BinanceSocketClientSpotStreams(Log log, BinanceSocketClient baseClient, BinanceSocketClientOptions options, IDataConverter dataConverter) :
+            base(options, options.SpotStreamsOptions, dataConverter)
         {
             _baseClient = baseClient;
             _log = log;
@@ -331,7 +332,7 @@ namespace Binance.Net.Clients.SpotApi
                 {
                     case executionUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceStreamOrderUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceStreamOrderUpdate>(0, token.ToString(), default);
                             if (result)
                                 onOrderUpdateMessage?.Invoke(data.As(result.Data, result.Data.Id.ToString()));
                             else
@@ -341,7 +342,7 @@ namespace Binance.Net.Clients.SpotApi
                         }
                     case ocoOrderUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceStreamOrderList>(token);
+                            var result = DataConverter.Deserialize<BinanceStreamOrderList>(0, token.ToString(), default);
                             if (result)
                                 onOcoOrderUpdateMessage?.Invoke(data.As(result.Data, result.Data.Id.ToString()));
                             else
@@ -351,7 +352,7 @@ namespace Binance.Net.Clients.SpotApi
                         }
                     case accountPositionUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceStreamPositionsUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceStreamPositionsUpdate>(0, token.ToString(), default);
                             if (result)
                                 onAccountPositionMessage?.Invoke(data.As(result.Data));
                             else
@@ -361,7 +362,7 @@ namespace Binance.Net.Clients.SpotApi
                         }
                     case balanceUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceStreamBalanceUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceStreamBalanceUpdate>(0, token.ToString(), default);
                             if (result)
                                 onAccountBalanceUpdate?.Invoke(data.As(result.Data, result.Data.Asset));
                             else

@@ -14,6 +14,7 @@ using Binance.Net.Objects.Models.Futures.Socket;
 using Binance.Net.Objects.Models.Spot.Socket;
 using CryptoExchange.Net;
 using CryptoExchange.Net.Authentication;
+using CryptoExchange.Net.DataProcessors;
 using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Sockets;
@@ -58,8 +59,8 @@ namespace Binance.Net.Clients.CoinFuturesApi
 
         #region constructor/destructor
 
-        internal BinanceSocketClientCoinFuturesStreams(Log log, BinanceSocketClient baseClient, BinanceSocketClientOptions options) :
-            base(options, options.CoinFuturesStreamsOptions)
+        internal BinanceSocketClientCoinFuturesStreams(Log log, BinanceSocketClient baseClient, BinanceSocketClientOptions options, IDataConverter dataConverter) :
+            base(options, options.CoinFuturesStreamsOptions, dataConverter)
         {
             _baseClient = baseClient;
             _log = log;
@@ -390,7 +391,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                 {
                     case configUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceFuturesStreamConfigUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceFuturesStreamConfigUpdate>(0, token.ToString(), default);
                             if (result)
                                 onConfigUpdate?.Invoke(data.As(result.Data, result.Data.LeverageUpdateData?.Symbol));
                             else
@@ -400,7 +401,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                         }
                     case marginUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceFuturesStreamMarginUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceFuturesStreamMarginUpdate>(0, token.ToString(), default);
                             if (result)
                                 onMarginUpdate?.Invoke(data.As(result.Data));
                             else
@@ -409,7 +410,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                         }
                     case accountUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceFuturesStreamAccountUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceFuturesStreamAccountUpdate>(0, token.ToString(), default);
                             if (result.Success)
                                 onAccountUpdate?.Invoke(data.As(result.Data));
                             else
@@ -419,7 +420,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                         }
                     case orderUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceFuturesStreamOrderUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceFuturesStreamOrderUpdate>(0, token.ToString(), default);
                             if (result)
                                 onOrderUpdate?.Invoke(data.As(result.Data, result.Data.UpdateData.Symbol));
                             else
@@ -428,7 +429,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                         }
                     case listenKeyExpiredEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceStreamEvent>(token);
+                            var result = DataConverter.Deserialize<BinanceStreamEvent>(0, token.ToString(), default);
                             if (result)
                                 onListenKeyExpired?.Invoke(data.As(result.Data));
                             else
@@ -454,7 +455,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
             if (internalData.Type == JTokenType.Array)
             {
                 var firstItemTopic = internalData.First()["i"]?.ToString() ?? internalData.First()["s"]?.ToString();
-                var deserialized = _baseClient.DeserializeInternal<BinanceCombinedStream<IEnumerable<T>>>(data.Data);
+                var deserialized = DataConverter.Deserialize<BinanceCombinedStream<IEnumerable<T>>>(0, data.Data.ToString(), default);
                 if (!deserialized)
                     return;
                 onMessage(data.As(deserialized.Data.Data, firstItemTopic));
@@ -462,8 +463,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
             else
             {
                 var symbol = internalData["i"]?.ToString() ?? internalData["s"]?.ToString();
-                var deserialized = _baseClient.DeserializeInternal<BinanceCombinedStream<T>>(
-                        data.Data);
+                var deserialized = DataConverter.Deserialize<BinanceCombinedStream<T>>(0, data.Data.ToString(), default);
                 if (!deserialized)
                     return;
                 onMessage(data.As<IEnumerable<T>>(new[] { deserialized.Data.Data }, symbol));

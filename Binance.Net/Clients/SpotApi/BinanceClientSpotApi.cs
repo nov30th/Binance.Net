@@ -21,6 +21,7 @@ using Binance.Net.Interfaces.Clients.SpotApi;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.CommonObjects;
 using CryptoExchange.Net.Interfaces.CommonClients;
+using CryptoExchange.Net.DataProcessors;
 
 namespace Binance.Net.Clients.SpotApi
 {
@@ -60,7 +61,8 @@ namespace Binance.Net.Clients.SpotApi
         public event Action<OrderId>? OnOrderCanceled;
 
         #region constructor/destructor
-        internal BinanceClientSpotApi(Log log, BinanceClient baseClient, BinanceClientOptions options) : base(options, options.SpotApiOptions)
+        internal BinanceClientSpotApi(Log log, BinanceClient baseClient, BinanceClientOptions options, IDataConverter converter)
+            : base(options, options.SpotApiOptions, converter)
         {
             Options = options;
             _log = log;

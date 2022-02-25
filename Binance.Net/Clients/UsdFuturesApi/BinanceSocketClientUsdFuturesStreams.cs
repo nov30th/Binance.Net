@@ -15,6 +15,7 @@ using Binance.Net.Objects.Models.Spot.Blvt;
 using Binance.Net.Objects.Models.Spot.Socket;
 using CryptoExchange.Net;
 using CryptoExchange.Net.Authentication;
+using CryptoExchange.Net.DataProcessors;
 using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Sockets;
@@ -67,8 +68,8 @@ namespace Binance.Net.Clients.UsdFuturesApi
         /// <summary>
         /// Create a new instance of BinanceSocketClientSpot with default options
         /// </summary>
-        public BinanceSocketClientUsdFuturesStreams(Log log, BinanceSocketClient baseClient, BinanceSocketClientOptions options) :
-            base(options, options.UsdFuturesStreamsOptions)
+        public BinanceSocketClientUsdFuturesStreams(Log log, BinanceSocketClient baseClient, BinanceSocketClientOptions options, IDataConverter dataConverter) :
+            base(options, options.UsdFuturesStreamsOptions, dataConverter)
         {
             _options = options;
             _baseClient = baseClient;
@@ -369,7 +370,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
                 {
                     case configUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceFuturesStreamConfigUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceFuturesStreamConfigUpdate>(0, token.ToString(), default);
                             if (result)
                                 onConfigUpdate?.Invoke(data.As(result.Data, result.Data.LeverageUpdateData?.Symbol));
                             else
@@ -379,7 +380,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
                         }
                     case marginUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceFuturesStreamMarginUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceFuturesStreamMarginUpdate>(0, token.ToString(), default);
                             if (result)
                                 onMarginUpdate?.Invoke(data.As(result.Data));
                             else
@@ -388,7 +389,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
                         }
                     case accountUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceFuturesStreamAccountUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceFuturesStreamAccountUpdate>(0, token.ToString(), default);
                             if (result.Success)
                                 onAccountUpdate?.Invoke(data.As(result.Data));
                             else
@@ -398,7 +399,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
                         }
                     case orderUpdateEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceFuturesStreamOrderUpdate>(token);
+                            var result = DataConverter.Deserialize<BinanceFuturesStreamOrderUpdate>(0, token.ToString(), default);
                             if (result)
                                 onOrderUpdate?.Invoke(data.As(result.Data, result.Data.UpdateData.Symbol));
                             else
@@ -407,7 +408,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
                         }
                     case listenKeyExpiredEvent:
                         {
-                            var result = _baseClient.DeserializeInternal<BinanceStreamEvent>(token);
+                            var result = DataConverter.Deserialize<BinanceStreamEvent>(0, token.ToString(), default);
                             if (result)
                                 onListenKeyExpired?.Invoke(data.As(result.Data));
                             else

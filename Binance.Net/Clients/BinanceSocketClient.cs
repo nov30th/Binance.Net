@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using Binance.Net.Interfaces.Clients.UsdFuturesApi;
 using Binance.Net.Objects;
 using Binance.Net.Objects.Internal;
 using CryptoExchange.Net;
+using CryptoExchange.Net.DataProcessors;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Sockets;
 using Microsoft.Extensions.Logging;
@@ -24,7 +26,17 @@ namespace Binance.Net.Clients
     /// <inheritdoc cref="IBinanceSocketClient" />
     public class BinanceSocketClient : BaseSocketClient, IBinanceSocketClient
     {
+        /// <summary>
+        /// A default serializer
+        /// </summary>
+        private static readonly JsonSerializer defaultSerializer = JsonSerializer.Create(new JsonSerializerSettings
+        {
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+            Culture = CultureInfo.InvariantCulture
+        });
+
         #region fields
+        private readonly IDataConverter _dataProcessor;
         #endregion
 
         #region Api clients
@@ -56,9 +68,10 @@ namespace Binance.Net.Clients
             SetDataInterpreter((data) => string.Empty, null);
             RateLimitPerSocketPerSecond = 4;
 
-            SpotStreams = AddApiClient(new BinanceSocketClientSpotStreams(log, this, options));
-            UsdFuturesStreams = AddApiClient(new BinanceSocketClientUsdFuturesStreams(log, this, options));
-            CoinFuturesStreams = AddApiClient(new BinanceSocketClientCoinFuturesStreams(log, this, options));
+            _dataProcessor = new JsonDataConverter(log, defaultSerializer);
+            SpotStreams = AddApiClient(new BinanceSocketClientSpotStreams(log, this, options, _dataProcessor));
+            UsdFuturesStreams = AddApiClient(new BinanceSocketClientUsdFuturesStreams(log, this, options, _dataProcessor));
+            CoinFuturesStreams = AddApiClient(new BinanceSocketClientCoinFuturesStreams(log, this, options, _dataProcessor));
         }
         #endregion 
 
@@ -72,9 +85,6 @@ namespace Binance.Net.Clients
         {
             BinanceSocketClientOptions.Default = options;
         }
-
-        internal CallResult<T> DeserializeInternal<T>(JToken obj, JsonSerializer? serializer = null, int? requestId = null)
-            => Deserialize<T>(obj, serializer, requestId);
 
         internal Task<CallResult<UpdateSubscription>> SubscribeInternal<T>(SocketApiClient apiClient, string url, IEnumerable<string> topics, Action<DataEvent<T>> onData, CancellationToken ct)
         {
@@ -164,7 +174,11 @@ namespace Binance.Net.Clients
             if (!connection.Socket.IsOpen)
                 return true;
 
-            await connection.SendAndWaitAsync(unsub, ClientOptions.SocketResponseTimeout, data =>
+            var unsubString = _dataProcessor.Serialize(connection.Socket.Id, unsub, default);
+            if(!unsubString)
+                return false;
+
+            await connection.SendAndWaitAsync(unsubString.Data, ClientOptions.SocketResponseTimeout, data =>
             {
                 if (data.Type != JTokenType.Object)
                     return false;
