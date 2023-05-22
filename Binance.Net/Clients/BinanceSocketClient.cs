@@ -6,7 +6,10 @@ using Binance.Net.Interfaces.Clients.CoinFuturesApi;
 using Binance.Net.Interfaces.Clients.SpotApi;
 using Binance.Net.Interfaces.Clients.UsdFuturesApi;
 using Binance.Net.Objects;
+using Binance.Net.Objects.Options;
 using CryptoExchange.Net;
+using Microsoft.Extensions.Logging;
+using System;
 
 namespace Binance.Net.Clients
 {
@@ -20,51 +23,66 @@ namespace Binance.Net.Clients
 
         /// <inheritdoc />
         public IBinanceSocketClientSpotApi SpotApi { get; set; }
-        // TODO rename to API
+
         /// <inheritdoc />
-        public IBinanceSocketClientUsdFuturesStreams UsdFuturesStreams { get; set; }
-        // TODO rename to API
+        public IBinanceSocketClientUsdFuturesApi UsdFuturesApi { get; set; }
+
         /// <inheritdoc />
-        public IBinanceSocketClientCoinFuturesStreams CoinFuturesStreams { get; set; }
+        public IBinanceSocketClientCoinFuturesApi CoinFuturesApi { get; set; }
 
         #endregion
 
         #region constructor/destructor
-
         /// <summary>
-        /// Create a new instance of BinanceSocketClientSpot with default options
+        /// Create a new instance of BinanceSocketClient
         /// </summary>
-        public BinanceSocketClient() : this(BinanceSocketClientOptions.Default)
+        /// <param name="logger">The logger</param>
+        public BinanceSocketClient(ILogger<BinanceSocketClient>? logger = null) : this((x) => { }, logger)
         {
         }
 
         /// <summary>
-        /// Create a new instance of BinanceSocketClientSpot using provided options
+        /// Create a new instance of BinanceSocketClient
         /// </summary>
-        /// <param name="options">The options to use for this client</param>
-        public BinanceSocketClient(BinanceSocketClientOptions options) : base("Binance", options)
+        /// <param name="optionsDelegate">Option configuration delegate</param>
+        public BinanceSocketClient(Action<BinanceSocketOptions> optionsDelegate) : this(optionsDelegate, null)
         {
-            SpotApi = AddApiClient(new BinanceSocketClientSpotApi(log, options));
-            UsdFuturesStreams = AddApiClient(new BinanceSocketClientUsdFuturesStreams(log, options));
-            CoinFuturesStreams = AddApiClient(new BinanceSocketClientCoinFuturesStreams(log, options));
         }
-        #endregion 
+
+        /// <summary>
+        /// Create a new instance of BinanceSocketClient
+        /// </summary>
+        /// <param name="logger">The logger</param>
+        /// <param name="optionsDelegate">Option configuration delegate</param>
+        public BinanceSocketClient(Action<BinanceSocketOptions> optionsDelegate, ILogger<BinanceSocketClient>? logger = null) : base(logger, "Binance")
+        {
+            var options = BinanceSocketOptions.Default.Copy();
+            optionsDelegate(options);
+            Initialize(options);
+
+            SpotApi = AddApiClient(new BinanceSocketClientSpotApi(_logger, options));
+            UsdFuturesApi = AddApiClient(new BinanceSocketClientUsdFuturesApi(_logger, options));
+            CoinFuturesApi = AddApiClient(new BinanceSocketClientCoinFuturesApi(_logger, options));
+        }
+        #endregion
 
         /// <summary>
         /// Set the default options to be used when creating new clients
         /// </summary>
-        /// <param name="options">Options to use as default</param>
-        public static void SetDefaultOptions(BinanceSocketClientOptions options)
+        /// <param name="optionsDelegate">Option configuration delegate</param>
+        public static void SetDefaultOptions(Action<BinanceSocketOptions> optionsDelegate)
         {
-            BinanceSocketClientOptions.Default = options;
+            var options = BinanceSocketOptions.Default.Copy();
+            optionsDelegate(options);
+            BinanceSocketOptions.Default = options;
         }
 
         /// <inheritdoc />
         public void SetApiCredentials(BinanceApiCredentials credentials)
         {
             SpotApi.SetApiCredentials(credentials);
-            UsdFuturesStreams.SetApiCredentials(credentials);
-            CoinFuturesStreams.SetApiCredentials(credentials);
+            UsdFuturesApi.SetApiCredentials(credentials);
+            CoinFuturesApi.SetApiCredentials(credentials);
         }
     }
 }

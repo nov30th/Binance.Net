@@ -13,7 +13,6 @@ using Binance.Net.Objects.Models.Futures.AlgoOrders;
 using CryptoExchange.Net;
 using CryptoExchange.Net.CommonObjects;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -46,16 +45,16 @@ namespace Binance.Net.Clients.UsdFuturesApi
 
         private const string api = "fapi";
 
-        private readonly Log _log;
+        private readonly ILogger _logger;
 
         private readonly BinanceClientUsdFuturesApi _baseClient;
-        private readonly string _spotBaseAddress;
+        private readonly string _spotBaseAddress; 
 
-        internal BinanceClientUsdFuturesApiTrading(Log log, BinanceClientUsdFuturesApi baseClient)
+        internal BinanceClientUsdFuturesApiTrading(ILogger logger, BinanceClientUsdFuturesApi baseClient)
         {
-            _log = log;
+            _logger = logger;
             _baseClient = baseClient;
-            _spotBaseAddress = _baseClient.Options.SpotApiOptions.BaseAddress;
+            _spotBaseAddress = ((BinanceEnvironment)_baseClient.Options.Environment).SpotRestAddress;
         }
 
         #region New Order
@@ -95,7 +94,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
             var rulesCheck = await _baseClient.CheckTradeRules(symbol, quantity, null, price, stopPrice, type, ct).ConfigureAwait(false);
             if (!rulesCheck.Passed)
             {
-                _log.Write(LogLevel.Warning, rulesCheck.ErrorMessage!);
+                _logger.Log(LogLevel.Warning, rulesCheck.ErrorMessage!);
                 return new WebCallResult<BinanceFuturesPlacedOrder>(new ArgumentError(rulesCheck.ErrorMessage!));
             }
 
@@ -148,14 +147,14 @@ namespace Binance.Net.Clients.UsdFuturesApi
             if (orders.Length <= 0 || orders.Length > 5)
                 throw new ArgumentException("Order list should be at least 1 and max 5 orders");
 
-            if (_baseClient.Options.UsdFuturesApiOptions.TradeRulesBehaviour != TradeRulesBehaviour.None)
+            if (_baseClient.Options.UsdFuturesOptions.TradeRulesBehaviour != TradeRulesBehaviour.None)
             {
                 foreach (var order in orders)
                 {
                     var rulesCheck = await _baseClient.CheckTradeRules(order.Symbol, order.Quantity, null, order.Price, order.StopPrice, order.Type, ct).ConfigureAwait(false);
                     if (!rulesCheck.Passed)
                     {
-                        _log.Write(LogLevel.Warning, rulesCheck.ErrorMessage!);
+                        _logger.Log(LogLevel.Warning, rulesCheck.ErrorMessage!);
                         return new WebCallResult<IEnumerable<CallResult<BinanceFuturesPlacedOrder>>>(new ArgumentError(rulesCheck.ErrorMessage!));
                     }
 

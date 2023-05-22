@@ -11,9 +11,9 @@ using CryptoExchange.Net;
 using CryptoExchange.Net.Converters;
 using Binance.Net.Interfaces.Clients.GeneralApi;
 using Binance.Net.Clients.SpotApi;
-using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Binance.Net.Objects.Options;
 
 namespace Binance.Net.Clients.GeneralApi
 {
@@ -21,8 +21,8 @@ namespace Binance.Net.Clients.GeneralApi
     public class BinanceClientGeneralApi : RestApiClient, IBinanceClientGeneralApi
     {
         #region fields 
-        internal new readonly BinanceClientOptions Options;
-        private readonly BinanceClient _baseClient;
+        internal new readonly BinanceRestOptions Options;
+        private readonly BinanceRestClient _baseClient;
         #endregion
 
         #region Api clients
@@ -42,7 +42,8 @@ namespace Binance.Net.Clients.GeneralApi
 
         #region constructor/destructor
 
-        internal BinanceClientGeneralApi(Log log, BinanceClient baseClient, BinanceClientOptions options) : base(log, options, options.SpotApiOptions)
+        internal BinanceClientGeneralApi(ILogger logger, HttpClient? httpClient, BinanceRestClient baseClient, BinanceRestOptions options) 
+            : base(logger, httpClient, ((BinanceEnvironment)options.Environment).SpotRestAddress, options, options.SpotOptions)
         {
             _baseClient = baseClient;
             Options = options;
@@ -80,9 +81,9 @@ namespace Binance.Net.Clients.GeneralApi
             ArrayParametersSerialization? arraySerialization = null, int weight = 1, bool ignoreRateLimit = false) where T : class
         {
             var result = await SendRequestAsync<T>(uri, method, cancellationToken, parameters, signed, postPosition, arraySerialization, weight, ignoreRatelimit: ignoreRateLimit).ConfigureAwait(false);
-            if (!result && result.Error!.Code == -1021 && Options.SpotApiOptions.AutoTimestamp)
+            if (!result && result.Error!.Code == -1021 && Options.SpotOptions.AutoTimestamp)
             {
-                _log.Write(LogLevel.Debug, "Received Invalid Timestamp error, triggering new time sync");
+                _logger.Log(LogLevel.Debug, "Received Invalid Timestamp error, triggering new time sync");
                 BinanceClientSpotApi.TimeSyncState.LastSyncTime = DateTime.MinValue;
             }
             return result;
@@ -95,7 +96,7 @@ namespace Binance.Net.Clients.GeneralApi
 
         /// <inheritdoc />
         public override TimeSyncInfo? GetTimeSyncInfo()
-            => new TimeSyncInfo(_log, Options.SpotApiOptions.AutoTimestamp, Options.SpotApiOptions.TimestampRecalculationInterval, BinanceClientSpotApi.TimeSyncState);
+            => new TimeSyncInfo(_logger, Options.SpotOptions.AutoTimestamp, Options.SpotOptions.TimestampRecalculationInterval, BinanceClientSpotApi.TimeSyncState);
 
         /// <inheritdoc />
         public override TimeSpan? GetTimeOffset()

@@ -7,26 +7,35 @@ using System.Threading;
 using System.Threading.Tasks;
 using Binance.Net.Objects.Models;
 using Binance.Net.Objects.Models.Futures.Socket;
-using Binance.Net.Objects.Models.Spot.Blvt;
 using Binance.Net.Objects.Models.Spot.Socket;
 using CryptoExchange.Net.Interfaces;
 
-namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
+namespace Binance.Net.Interfaces.Clients.CoinFuturesApi
 {
     /// <summary>
-    /// Binance USD futures streams
+    /// Binance Coin futures streams
     /// </summary>
-    public interface IBinanceSocketClientUsdFuturesStreams : ISocketApiClient, IDisposable
+    public interface IBinanceSocketClientCoinFuturesApi : ISocketApiClient, IDisposable
     {
         /// <summary>
         /// Subscribes to the aggregated trades update stream for the provided symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#aggregate-trade-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#aggregate-trade-streams" /></para>
         /// </summary>
         /// <param name="symbol">The symbol</param>
         /// <param name="onMessage">The event handler for the received data</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
         /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
         Task<CallResult<UpdateSubscription>> SubscribeToAggregatedTradeUpdatesAsync(string symbol, Action<DataEvent<BinanceStreamAggregatedTrade>> onMessage, CancellationToken ct = default);
+
+        /// <summary>
+        /// Subscribes to the aggregated trades update stream for the provided symbols
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#aggregate-trade-streams" /></para>
+        /// </summary>
+        /// <param name="symbols">The symbols</param>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToAggregatedTradeUpdatesAsync(IEnumerable<string> symbols, Action<DataEvent<BinanceStreamAggregatedTrade>> onMessage, CancellationToken ct = default);
 
         /// <summary>
         /// Subscribe to individual trade update. NOTE: This endpoint stream isn't document and therefor might be changed or removed without prior notice
@@ -49,40 +58,8 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
             Action<DataEvent<BinanceStreamTrade>> onMessage, CancellationToken ct = default);
 
         /// <summary>
-        /// Subscribes to the aggregated trades update stream for the provided symbols
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#aggregate-trade-streams" /></para>
-        /// </summary>
-        /// <param name="symbols">The symbols</param>
-        /// <param name="onMessage">The event handler for the received data</param>
-        /// <param name="ct">Cancellation token for closing this subscription</param>
-        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToAggregatedTradeUpdatesAsync(IEnumerable<string> symbols, Action<DataEvent<BinanceStreamAggregatedTrade>> onMessage, CancellationToken ct = default);
-
-        /// <summary>
-        /// Subscribes to the Mark price update stream for a single symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#mark-price-stream" /></para>
-        /// </summary>
-        /// <param name="symbol">The symbol</param>
-        /// <param name="updateInterval">Update interval in milliseconds, either 1000 or 3000. Defaults to 3000</param>
-        /// <param name="onMessage">The event handler for the received data</param>
-        /// <param name="ct">Cancellation token for closing this subscription</param>
-        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToMarkPriceUpdatesAsync(string symbol, int? updateInterval, Action<DataEvent<BinanceFuturesUsdtStreamMarkPrice>> onMessage, CancellationToken ct = default);
-
-        /// <summary>
-        /// Subscribes to the Mark price update stream for a list of symbols
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#mark-price-stream" /></para>
-        /// </summary>
-        /// <param name="symbols">The symbols</param>
-        /// <param name="updateInterval">Update interval in milliseconds, either 1000 or 3000. Defaults to 3000</param>
-        /// <param name="onMessage">The event handler for the received data</param>
-        /// <param name="ct">Cancellation token for closing this subscription</param>
-        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToMarkPriceUpdatesAsync(IEnumerable<string> symbols, int? updateInterval, Action<DataEvent<BinanceFuturesUsdtStreamMarkPrice>> onMessage, CancellationToken ct = default);
-
-        /// <summary>
         /// Subscribes to the candlestick update stream for the provided symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#kline-candlestick-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#kline-candlestick-streams" /></para>
         /// </summary>
         /// <param name="symbol">The symbol</param>
         /// <param name="interval">The interval of the candlesticks</param>
@@ -93,7 +70,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to the candlestick update stream for the provided symbol and intervals
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#kline-candlestick-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#kline-candlestick-streams" /></para>
         /// </summary>
         /// <param name="symbol">The symbol</param>
         /// <param name="intervals">The intervals of the candlesticks</param>
@@ -104,7 +81,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to the candlestick update stream for the provided symbols
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#kline-candlestick-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#kline-candlestick-streams" /></para>
         /// </summary>
         /// <param name="symbols">The symbols</param>
         /// <param name="interval">The interval of the candlesticks</param>
@@ -115,7 +92,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to the candlestick update stream for the provided symbols and intervals
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#kline-candlestick-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#kline-candlestick-streams" /></para>
         /// </summary>
         /// <param name="symbols">The symbols</param>
         /// <param name="intervals">The intervals of the candlesticks</param>
@@ -125,32 +102,8 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
         Task<CallResult<UpdateSubscription>> SubscribeToKlineUpdatesAsync(IEnumerable<string> symbols, IEnumerable<KlineInterval> intervals, Action<DataEvent<IBinanceStreamKlineData>> onMessage, CancellationToken ct = default);
 
         /// <summary>
-        /// Subscribes to the continuous contract candlestick update stream for the provided pair
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-streams" /></para>
-        /// </summary>
-        /// <param name="pair">The pair</param>
-        /// <param name="contractType">The contract type</param>
-        /// <param name="interval">The interval of the candlesticks</param>
-        /// <param name="onMessage">The event handler for the received data</param>
-        /// <param name="ct">Cancellation token for closing this subscription</param>
-        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToContinuousContractKlineUpdatesAsync(string pair, ContractType contractType, KlineInterval interval, Action<DataEvent<BinanceStreamContinuousKlineData>> onMessage, CancellationToken ct = default);
-
-        /// <summary>
-        /// Subscribes to the continuous contract candlestick update stream for the provided pairs
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-streams" /></para>
-        /// </summary>
-        /// <param name="pairs">The pairs</param>
-        /// <param name="contractType">The contract type</param>
-        /// <param name="interval">The interval of the candlesticks</param>
-        /// <param name="onMessage">The event handler for the received data</param>
-        /// <param name="ct">Cancellation token for closing this subscription</param>
-        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToContinuousContractKlineUpdatesAsync(IEnumerable<string> pairs, ContractType contractType, KlineInterval interval, Action<DataEvent<BinanceStreamContinuousKlineData>> onMessage, CancellationToken ct = default);
-
-        /// <summary>
         /// Subscribes to mini ticker updates stream for a specific symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#individual-symbol-mini-ticker-stream" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#individual-symbol-mini-ticker-stream" /></para>
         /// </summary>
         /// <param name="symbol">The symbol to subscribe to</param>
         /// <param name="onMessage">The event handler for the received data</param>
@@ -160,7 +113,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to mini ticker updates stream for a list of symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#individual-symbol-mini-ticker-stream" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#individual-symbol-mini-ticker-stream" /></para>
         /// </summary>
         /// <param name="symbols">The symbols to subscribe to</param>
         /// <param name="onMessage">The event handler for the received data</param>
@@ -170,7 +123,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to mini ticker updates stream for all symbols
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#all-market-mini-tickers-stream" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#all-market-mini-tickers-stream" /></para>
         /// </summary>
         /// <param name="onMessage">The event handler for the received data</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
@@ -179,7 +132,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to ticker updates stream for a specific symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#individual-symbol-ticker-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#individual-symbol-ticker-streams" /></para>
         /// </summary>
         /// <param name="symbol">The symbol to subscribe to</param>
         /// <param name="onMessage">The event handler for the received data</param>
@@ -189,7 +142,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to ticker updates stream for a specific symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#individual-symbol-ticker-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#individual-symbol-ticker-streams" /></para>
         /// </summary>
         /// <param name="symbols">The symbols to subscribe to</param>
         /// <param name="onMessage">The event handler for the received data</param>
@@ -199,7 +152,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to ticker updates stream for all symbols
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#all-market-tickers-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#all-market-tickers-streams" /></para>
         /// </summary>
         /// <param name="onMessage">The event handler for the received data</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
@@ -208,7 +161,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to all book ticker update streams
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#all-book-tickers-stream" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#all-book-tickers-stream" /></para>
         /// </summary>
         /// <param name="onMessage">The event handler for the received data</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
@@ -217,7 +170,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to the book ticker update stream for the provided symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#individual-symbol-book-ticker-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#individual-symbol-book-ticker-streams" /></para>
         /// </summary>
         /// <param name="symbol">The symbol</param>
         /// <param name="onMessage">The event handler for the received data</param>
@@ -227,7 +180,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to the book ticker update stream for the provided symbols
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#individual-symbol-book-ticker-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#individual-symbol-book-ticker-streams" /></para>
         /// </summary>
         /// <param name="symbols">The symbols</param>
         /// <param name="onMessage">The event handler for the received data</param>
@@ -237,7 +190,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to specific symbol forced liquidations stream
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#liquidation-order-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#liquidation-order-streams" /></para>
         /// </summary>
         /// <param name="symbol">The symbol</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
@@ -247,7 +200,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to list of symbol forced liquidations stream
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#liquidation-order-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#liquidation-order-streams" /></para>
         /// </summary>
         /// <param name="symbols">The symbols</param>
         /// <param name="onMessage">The event handler for the received data</param>
@@ -257,7 +210,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to all forced liquidations stream
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#all-market-liquidation-order-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#all-market-liquidation-order-streams" /></para>
         /// </summary>
         /// <param name="onMessage">The event handler for the received data</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
@@ -266,7 +219,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to the depth updates for the provided symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#partial-book-depth-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#partial-book-depth-streams" /></para>
         /// </summary>
         /// <param name="symbol">The symbol to subscribe on</param>
         /// <param name="levels">The amount of entries to be returned in the update</param>
@@ -278,7 +231,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to the depth updates for the provided symbols
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#partial-book-depth-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#partial-book-depth-streams" /></para>
         /// </summary>
         /// <param name="symbols">The symbols to subscribe on</param>
         /// <param name="levels">The amount of entries to be returned in the update of each symbol</param>
@@ -290,7 +243,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to the order book updates for the provided symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#diff-book-depth-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#diff-book-depth-streams" /></para>
         /// </summary>
         /// <param name="symbol">The symbol</param>
         /// <param name="updateInterval">Update interval in milliseconds, either 0 or 100, 500 or 1000, depending on endpoint</param>
@@ -301,7 +254,7 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
 
         /// <summary>
         /// Subscribes to the depth update stream for the provided symbols
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#diff-book-depth-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#diff-book-depth-streams" /></para>
         /// </summary>
         /// <param name="symbols">The symbols</param>
         /// <param name="updateInterval">Update interval in milliseconds, either 0 or 100, 500 or 1000, depending on endpoint</param>
@@ -311,16 +264,8 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
         Task<CallResult<UpdateSubscription>> SubscribeToOrderBookUpdatesAsync(IEnumerable<string> symbols, int? updateInterval, Action<DataEvent<IBinanceFuturesEventOrderBook>> onMessage, CancellationToken ct = default);
 
         /// <summary>
-        /// Subscribe to contract/symbol updates
-        /// </summary>
-        /// <param name="onMessage">The event handler for the received data</param>
-        /// <param name="ct">Cancellation token for closing this subscription</param>
-        /// <returns></returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToSymbolUpdatesAsync(Action<DataEvent<BinanceFuturesStreamSymbolUpdate>> onMessage, CancellationToken ct = default);
-
-        /// <summary>
         /// Subscribes to the account update stream. Prior to using this, the BinanceClient.Futures.UserStreams.StartUserStream method should be called.
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#user-data-streams" /></para>
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#user-data-streams" /></para>
         /// </summary>
         /// <param name="listenKey">Listen key retrieved by the StartUserStream method</param>
         /// <param name="onLeverageUpdate">The event handler for leverage changed update</param>
@@ -328,8 +273,6 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
         /// <param name="onAccountUpdate">The event handler for whenever an account update is received</param>
         /// <param name="onOrderUpdate">The event handler for whenever an order status update is received</param>
         /// <param name="onListenKeyExpired">Responds when the listen key for the stream has expired. Initiate a new instance of the stream here</param>
-        /// <param name="onStrategyUpdate">The event handler for whenever a strategy update is received</param>
-        /// <param name="onGridUpdate">The event handler for whenever a grid update is received</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
         /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
         Task<CallResult<UpdateSubscription>> SubscribeToUserDataUpdatesAsync(
@@ -339,31 +282,136 @@ namespace Binance.Net.Interfaces.Clients.UsdFuturesApi
             Action<DataEvent<BinanceFuturesStreamAccountUpdate>>? onAccountUpdate,
             Action<DataEvent<BinanceFuturesStreamOrderUpdate>>? onOrderUpdate,
             Action<DataEvent<BinanceStreamEvent>> onListenKeyExpired,
-            Action<DataEvent<BinanceStrategyUpdate>>? onStrategyUpdate,
-            Action<DataEvent<BinanceGridUpdate>>? onGridUpdate,
             CancellationToken ct = default);
 
-        
         /// <summary>
-        /// Subscribes to the Mark price update stream for a all symbols
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#mark-price-stream-for-all-market" /></para>
+        /// Subscribes to the Index price update stream for a single pair
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#index-price-stream" /></para>
         /// </summary>
+        /// <param name="pair">The symbol</param>
         /// <param name="updateInterval">Update interval in milliseconds, either 1000 or 3000. Defaults to 3000</param>
         /// <param name="onMessage">The event handler for the received data</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
         /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToAllMarkPriceUpdatesAsync(int? updateInterval, Action<DataEvent<IEnumerable<BinanceFuturesUsdtStreamMarkPrice>>> onMessage, CancellationToken ct = default);
+        Task<CallResult<UpdateSubscription>> SubscribeToIndexPriceUpdatesAsync(string pair, int? updateInterval, Action<DataEvent<IEnumerable<BinanceFuturesStreamIndexPrice>>> onMessage, CancellationToken ct = default);
 
         /// <summary>
-        /// Subscribes to composite index updates stream for a symbol
-        /// <para><a href="https://binance-docs.github.io/apidocs/futures/en/#composite-index-symbol-information-streams" /></para>
+        /// Subscribes to the Index price update stream for a list of pairs
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#index-price-stream" /></para>
         /// </summary>
-        /// <param name="symbol">The symbol to subscribe</param>
+        /// <param name="pairs">The pairs</param>
+        /// <param name="updateInterval">Update interval in milliseconds, either 1000 or 3000. Defaults to 3000</param>
         /// <param name="onMessage">The event handler for the received data</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
         /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToCompositeIndexUpdatesAsync(string symbol,
-            Action<DataEvent<BinanceFuturesStreamCompositeIndex>> onMessage, CancellationToken ct = default);
+        Task<CallResult<UpdateSubscription>> SubscribeToIndexPriceUpdatesAsync(IEnumerable<string> pairs, int? updateInterval, Action<DataEvent<IEnumerable<BinanceFuturesStreamIndexPrice>>> onMessage, CancellationToken ct = default);
 
+        /// <summary>
+        /// Subscribes to the Mark price update stream for a single symbol
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#mark-price-stream" /></para>
+        /// </summary>
+        /// <param name="symbol">The symbol</param>
+        /// <param name="updateInterval">Update interval in milliseconds, either 1000 or 3000. Defaults to 3000</param>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToMarkPriceUpdatesAsync(string symbol, int? updateInterval, Action<DataEvent<IEnumerable<BinanceFuturesCoinStreamMarkPrice>>> onMessage, CancellationToken ct = default);
+
+        /// <summary>
+        ///Subscribe to the Mark price update stream for all symbols
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#mark-price-of-all-symbols-of-a-pair" /></para>
+        /// </summary>
+        /// <param name="onMessage"></param>
+        /// <param name="updateInterval"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToAllMarkPriceUpdatesAsync(Action<DataEvent<IEnumerable<BinanceFuturesCoinStreamMarkPrice>>> onMessage, int? updateInterval = null, CancellationToken ct = default);
+
+        /// <summary>
+        /// Subscribes to the Mark price update stream for a list of symbols
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#mark-price-stream" /></para>
+        /// </summary>
+        /// <param name="symbols">The symbols</param>
+        /// <param name="updateInterval">Update interval in milliseconds, either 1000 or 3000. Defaults to 3000</param>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToMarkPriceUpdatesAsync(IEnumerable<string> symbols, int? updateInterval, Action<DataEvent<IEnumerable<BinanceFuturesCoinStreamMarkPrice>>> onMessage, CancellationToken ct = default);
+
+        /// <summary>
+        /// Subscribes to the continuous contract candlestick update stream for the provided pair
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#continuous-contract-kline-candlestick-streams" /></para>
+        /// </summary>
+        /// <param name="pair">The pair</param>
+        /// <param name="contractType">The contract type</param>
+        /// <param name="interval">The interval of the candlesticks</param>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToContinuousContractKlineUpdatesAsync(string pair, ContractType contractType, KlineInterval interval, Action<DataEvent<BinanceStreamKlineData>> onMessage, CancellationToken ct = default);
+
+        /// <summary>
+        /// Subscribes to the continuous contract candlestick update stream for the provided pairs
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#continuous-contract-kline-candlestick-streams" /></para>
+        /// </summary>
+        /// <param name="pairs">The pairs</param>
+        /// <param name="contractType">The contract type</param>
+        /// <param name="interval">The interval of the candlesticks</param>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToContinuousContractKlineUpdatesAsync(IEnumerable<string> pairs, ContractType contractType, KlineInterval interval, Action<DataEvent<BinanceStreamKlineData>> onMessage, CancellationToken ct = default);
+
+        /// <summary>
+        /// Subscribes to the index candlestick update stream for the provided pair
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#index-kline-candlestick-streams" /></para>
+        /// </summary>
+        /// <param name="pair">The pair</param>
+        /// <param name="interval">The interval of the candlesticks</param>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToIndexKlineUpdatesAsync(string pair, KlineInterval interval, Action<DataEvent<BinanceStreamIndexKlineData>> onMessage, CancellationToken ct = default);
+
+        /// <summary>
+        /// Subscribes to the index candlestick update stream for the provided pairs
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#index-kline-candlestick-streams" /></para>
+        /// </summary>
+        /// <param name="pairs">The pairs</param>
+        /// <param name="interval">The interval of the candlesticks</param>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToIndexKlineUpdatesAsync(IEnumerable<string> pairs, KlineInterval interval, Action<DataEvent<BinanceStreamIndexKlineData>> onMessage, CancellationToken ct = default);
+
+        /// <summary>
+        /// Subscribes to the mark price candlestick update stream for the provided symbol
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#mark-price-kline-candlestick-streams" /></para>
+        /// </summary>
+        /// <param name="symbol">The symbol</param>
+        /// <param name="interval">The interval of the candlesticks</param>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToMarkPriceKlineUpdatesAsync(string symbol, KlineInterval interval, Action<DataEvent<BinanceStreamIndexKlineData>> onMessage, CancellationToken ct = default);
+
+        /// <summary>
+        /// Subscribes to the mark price candlestick update stream for the provided symbols
+        /// <para><a href="https://binance-docs.github.io/apidocs/delivery/en/#mark-price-kline-candlestick-streams" /></para>
+        /// </summary>
+        /// <param name="symbols">The symbols</param>
+        /// <param name="interval">The interval of the candlesticks</param>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToMarkPriceKlineUpdatesAsync(IEnumerable<string> symbols, KlineInterval interval, Action<DataEvent<BinanceStreamIndexKlineData>> onMessage, CancellationToken ct = default);
+
+        /// <summary>
+        /// Subscribe to contract/symbol updates
+        /// </summary>
+        /// <param name="onMessage">The event handler for the received data</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns></returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToSymbolUpdatesAsync(Action<DataEvent<BinanceFuturesStreamSymbolUpdate>> onMessage, CancellationToken ct = default);
     }
 }

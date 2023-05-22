@@ -12,15 +12,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Binance.Net.Objects.Internal;
 using Binance.Net.Objects.Models.Futures;
-using Binance.Net.Objects.Models.Spot;
 using CryptoExchange.Net;
-using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.Logging;
 using Binance.Net.Interfaces.Clients.UsdFuturesApi;
-using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.CommonObjects;
 using CryptoExchange.Net.Interfaces.CommonClients;
 using Newtonsoft.Json.Linq;
+using Binance.Net.Objects.Options;
 
 namespace Binance.Net.Clients.UsdFuturesApi
 {
@@ -28,7 +25,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
     public class BinanceClientUsdFuturesApi : RestApiClient, IBinanceClientUsdFuturesApi, IFuturesClient
     {
         #region fields 
-        internal new readonly BinanceClientOptions Options;
+        internal new readonly BinanceRestOptions Options;
 
         internal BinanceFuturesUsdtExchangeInfo? ExchangeInfo;
         internal DateTime? LastExchangeInfoUpdate;
@@ -57,14 +54,14 @@ namespace Binance.Net.Clients.UsdFuturesApi
         public event Action<OrderId>? OnOrderCanceled;
 
         #region constructor/destructor
-        internal BinanceClientUsdFuturesApi(Log log, BinanceClientOptions options) :
-            base(log,options, options.UsdFuturesApiOptions)
+        internal BinanceClientUsdFuturesApi(ILogger logger, HttpClient? httpClient, BinanceRestOptions options)
+            : base(logger, httpClient, ((BinanceEnvironment)options.Environment).UsdFuturesRestAddress!, options, options.UsdFuturesOptions)
         {
             Options = options;
 
             Account = new BinanceClientUsdFuturesApiAccount(this);
-            ExchangeData = new BinanceClientUsdFuturesApiExchangeData(log, this);
-            Trading = new BinanceClientUsdFuturesApiTrading(log, this);
+            ExchangeData = new BinanceClientUsdFuturesApiExchangeData(logger, this);
+            Trading = new BinanceClientUsdFuturesApiTrading(logger, this);
 
             requestBodyEmptyContent = "";
             requestBodyFormat = RequestBodyFormat.FormData;
@@ -119,10 +116,10 @@ namespace Binance.Net.Clients.UsdFuturesApi
             var outputPrice = price;
             var outputStopPrice = stopPrice;
 
-            if (Options.UsdFuturesApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.None)
+            if (Options.UsdFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.None)
                 return BinanceTradeRuleResult.CreatePassed(outputQuantity, quoteQuantity, outputPrice, outputStopPrice);
 
-            if (ExchangeInfo == null || LastExchangeInfoUpdate == null || (DateTime.UtcNow - LastExchangeInfoUpdate.Value).TotalMinutes > Options.UsdFuturesApiOptions.TradeRulesUpdateInterval.TotalMinutes)
+            if (ExchangeInfo == null || LastExchangeInfoUpdate == null || (DateTime.UtcNow - LastExchangeInfoUpdate.Value).TotalMinutes > Options.UsdFuturesOptions.TradeRulesUpdateInterval.TotalMinutes)
                 await ExchangeData.GetExchangeInfoAsync(ct).ConfigureAwait(false);
 
             if (ExchangeInfo == null)
@@ -155,12 +152,12 @@ namespace Binance.Net.Clients.UsdFuturesApi
                     outputQuantity = BinanceHelpers.ClampQuantity(minQty.Value, maxQty!.Value, stepSize!.Value, quantity.Value);
                     if (outputQuantity != quantity.Value)
                     {
-                        if (Options.UsdFuturesApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                        if (Options.UsdFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                         {
                             return BinanceTradeRuleResult.CreateFailed($"Trade rules check failed: LotSize filter failed. Original quantity: {quantity}, Closest allowed: {outputQuantity}");
                         }
 
-                        _log.Write(LogLevel.Information, $"Quantity clamped from {quantity} to {outputQuantity}");
+                        _logger.Log(LogLevel.Information, $"Quantity clamped from {quantity} to {outputQuantity}");
                     }
                 }
             }
@@ -169,12 +166,12 @@ namespace Binance.Net.Clients.UsdFuturesApi
             {
                 if (quoteQuantity < symbolData.MinNotionalFilter.MinNotional)
                 {
-                    if (Options.SpotApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                    if (Options.UsdFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                         return BinanceTradeRuleResult.CreateFailed(
                             $"Trade rules check failed: MinNotional filter failed. Order value: {quoteQuantity}, minimal order value: {symbolData.MinNotionalFilter.MinNotional}");
 
                     outputQuoteQuantity = symbolData.MinNotionalFilter.MinNotional;
-                    _log.Write(LogLevel.Information, $"QuoteQuantity adjusted from {quoteQuantity} to {outputQuoteQuantity} based on min notional filter");
+                    _logger.Log(LogLevel.Information, $"QuoteQuantity adjusted from {quoteQuantity} to {outputQuoteQuantity} based on min notional filter");
                 }
             }
 
@@ -188,10 +185,10 @@ namespace Binance.Net.Clients.UsdFuturesApi
                     outputPrice = BinanceHelpers.ClampPrice(symbolData.PriceFilter.MinPrice, symbolData.PriceFilter.MaxPrice, price.Value);
                     if (outputPrice != price)
                     {
-                        if (Options.UsdFuturesApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                        if (Options.UsdFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                             return BinanceTradeRuleResult.CreateFailed($"Trade rules check failed: Price filter max/min failed. Original price: {price}, Closest allowed: {outputPrice}");
 
-                        _log.Write(LogLevel.Information, $"price clamped from {price} to {outputPrice}");
+                        _logger.Log(LogLevel.Information, $"price clamped from {price} to {outputPrice}");
                     }
 
                     if (stopPrice != null)
@@ -200,11 +197,11 @@ namespace Binance.Net.Clients.UsdFuturesApi
                             symbolData.PriceFilter.MaxPrice, stopPrice.Value);
                         if (outputStopPrice != stopPrice)
                         {
-                            if (Options.UsdFuturesApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                            if (Options.UsdFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                                 return BinanceTradeRuleResult.CreateFailed(
                                     $"Trade rules check failed: Stop price filter max/min failed. Original stop price: {stopPrice}, Closest allowed: {outputStopPrice}");
 
-                            _log.Write(LogLevel.Information,
+                            _logger.Log(LogLevel.Information,
                                 $"Stop price clamped from {stopPrice} to {outputStopPrice} based on price filter");
                         }
                     }
@@ -216,10 +213,10 @@ namespace Binance.Net.Clients.UsdFuturesApi
                     outputPrice = BinanceHelpers.FloorPrice(symbolData.PriceFilter.TickSize, price.Value);
                     if (outputPrice != beforePrice)
                     {
-                        if (Options.UsdFuturesApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                        if (Options.UsdFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                             return BinanceTradeRuleResult.CreateFailed($"Trade rules check failed: Price filter tick failed. Original price: {price}, Closest allowed: {outputPrice}");
 
-                        _log.Write(LogLevel.Information, $"price rounded from {beforePrice} to {outputPrice}");
+                        _logger.Log(LogLevel.Information, $"price rounded from {beforePrice} to {outputPrice}");
                     }
 
                     if (stopPrice != null)
@@ -228,11 +225,11 @@ namespace Binance.Net.Clients.UsdFuturesApi
                         outputStopPrice = BinanceHelpers.FloorPrice(symbolData.PriceFilter.TickSize, stopPrice.Value);
                         if (outputStopPrice != beforeStopPrice)
                         {
-                            if (Options.UsdFuturesApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                            if (Options.UsdFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                                 return BinanceTradeRuleResult.CreateFailed(
                                     $"Trade rules check failed: Stop price filter tick failed. Original stop price: {stopPrice}, Closest allowed: {outputStopPrice}");
 
-                            _log.Write(LogLevel.Information,
+                            _logger.Log(LogLevel.Information,
                                 $"Stop price floored from {beforeStopPrice} to {outputStopPrice} based on price filter");
                         }
                     }
@@ -247,9 +244,9 @@ namespace Binance.Net.Clients.UsdFuturesApi
             ArrayParametersSerialization? arraySerialization = null, int weight = 1, bool ignoreRateLimit = false) where T : class
         {
             var result = await SendRequestAsync<T>(uri, method, cancellationToken, parameters, signed, postPosition, arraySerialization, weight, ignoreRatelimit: ignoreRateLimit).ConfigureAwait(false);
-            if (!result && result.Error!.Code == -1021 && Options.SpotApiOptions.AutoTimestamp)
+            if (!result && result.Error!.Code == -1021 && Options.UsdFuturesOptions.AutoTimestamp)
             {
-                _log.Write(LogLevel.Debug, "Received Invalid Timestamp error, triggering new time sync");
+                _logger.Log(LogLevel.Debug, "Received Invalid Timestamp error, triggering new time sync");
                 TimeSyncState.LastSyncTime = DateTime.MinValue;
             }
             return result;
@@ -261,7 +258,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
 
         /// <inheritdoc />
         public override TimeSyncInfo? GetTimeSyncInfo()
-            => new TimeSyncInfo(_log, Options.UsdFuturesApiOptions.AutoTimestamp, Options.UsdFuturesApiOptions.TimestampRecalculationInterval, TimeSyncState);
+            => new TimeSyncInfo(_logger, Options.UsdFuturesOptions.AutoTimestamp, Options.UsdFuturesOptions.TimestampRecalculationInterval, TimeSyncState);
 
         /// <inheritdoc />
         public override TimeSpan? GetTimeOffset()

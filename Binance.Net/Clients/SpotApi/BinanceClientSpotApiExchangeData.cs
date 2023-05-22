@@ -19,7 +19,6 @@ using Binance.Net.Objects.Models.Spot.Margin;
 using Binance.Net.Objects.Models.Spot.Staking;
 using CryptoExchange.Net;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -81,13 +80,13 @@ namespace Binance.Net.Clients.SpotApi
         private const string bSwapApi = "sapi";
         private const string bSwapVersion = "1";
 
-        private readonly Log _log;
+        private readonly ILogger _logger;
 
         private readonly BinanceClientSpotApi _baseClient;
 
-        internal BinanceClientSpotApiExchangeData(Log log, BinanceClientSpotApi baseClient)
+        internal BinanceClientSpotApiExchangeData(ILogger logger, BinanceClientSpotApi baseClient)
         {
-            _log = log;
+            _logger = logger;
             _baseClient = baseClient;
         }
 
@@ -155,7 +154,7 @@ namespace Binance.Net.Clients.SpotApi
 
             _baseClient.ExchangeInfo = exchangeInfoResult.Data;
             _baseClient.LastExchangeInfoUpdate = DateTime.UtcNow;
-            _log.Write(LogLevel.Information, "Trade rules updated");
+            _logger.Log(LogLevel.Information, "Trade rules updated");
             return exchangeInfoResult;
         }
 
@@ -179,7 +178,7 @@ namespace Binance.Net.Clients.SpotApi
 
             _baseClient.ExchangeInfo = exchangeInfoResult.Data;
             _baseClient.LastExchangeInfoUpdate = DateTime.UtcNow;
-            _log.Write(LogLevel.Information, "Trade rules updated");
+            _logger.Log(LogLevel.Information, "Trade rules updated");
             return exchangeInfoResult;
         }
 
@@ -211,7 +210,7 @@ namespace Binance.Net.Clients.SpotApi
         /// <inheritdoc />
         public async Task<WebCallResult<IEnumerable<BinanceProduct>>> GetProductsAsync(CancellationToken ct = default)
         {
-            var url = _baseClient.Options.SpotApiOptions.BaseAddress.Replace("api.", "www.").AppendPath("exchange-api/v2/public/asset-service/product/get-products");
+            var url = ((BinanceEnvironment)_baseClient.Options.Environment).SpotRestAddress.Replace("api.", "www.").AppendPath("exchange-api/v2/public/asset-service/product/get-products");
 
             var data = await _baseClient.SendRequestInternal<BinanceExchangeApiWrapper<IEnumerable<BinanceProduct>>>(new Uri(url), HttpMethod.Get, ct).ConfigureAwait(false);
             if (!data)

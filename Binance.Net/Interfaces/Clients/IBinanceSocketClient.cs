@@ -15,7 +15,7 @@ namespace Binance.Net.Interfaces.Clients
         /// <summary>
         /// Coin futures streams
         /// </summary>
-        IBinanceSocketClientCoinFuturesStreams CoinFuturesStreams { get; }
+        IBinanceSocketClientCoinFuturesApi CoinFuturesApi { get; }
         /// <summary>
         /// Spot streams and requests
         /// </summary>
@@ -23,7 +23,7 @@ namespace Binance.Net.Interfaces.Clients
         /// <summary>
         /// Usd futures streams
         /// </summary>
-        IBinanceSocketClientUsdFuturesStreams UsdFuturesStreams { get; }
+        IBinanceSocketClientUsdFuturesApi UsdFuturesApi { get; }
 
         /// <summary>
         /// Set the API credentials for this client. All Api clients in this client will use the new credentials, regardless of earlier set options.

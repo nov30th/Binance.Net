@@ -17,7 +17,6 @@ using Binance.Net.Objects.Models.Spot.Staking;
 using CryptoExchange.Net;
 using CryptoExchange.Net.CommonObjects;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -110,12 +109,12 @@ namespace Binance.Net.Clients.SpotApi
         private const string convertTransferHistoryEndpoint = "asset/convert-transfer/queryByPage";
 
         private readonly BinanceClientSpotApi _baseClient;
-        private readonly Log _log;
+        private readonly ILogger _logger;
 
-        internal BinanceClientSpotApiTrading(Log log, BinanceClientSpotApi baseClient)
+        internal BinanceClientSpotApiTrading(ILogger logger, BinanceClientSpotApi baseClient)
         {
             _baseClient = baseClient;
-            _log = log;
+            _logger = logger;
         }
 
         #region Test New Order 
@@ -293,7 +292,7 @@ namespace Binance.Net.Clients.SpotApi
             var rulesCheck = await _baseClient.CheckTradeRules(symbol, quantity, quoteQuantity, price, stopPrice, type, ct).ConfigureAwait(false);
             if (!rulesCheck.Passed)
             {
-                _log.Write(LogLevel.Warning, rulesCheck.ErrorMessage!);
+                _logger.Log(LogLevel.Warning, rulesCheck.ErrorMessage!);
                 return new WebCallResult<BinanceReplaceOrderResult>(new ArgumentError(rulesCheck.ErrorMessage!));
             }
 
@@ -329,7 +328,7 @@ namespace Binance.Net.Clients.SpotApi
             if (!result && result.OriginalData != null)
             {
                 // Attempt to parse the error
-                var jsonData = result.OriginalData.ToJToken(_log);
+                var jsonData = result.OriginalData.ToJToken(_logger);
                 if (jsonData != null)
                 {
                     var dataNode = jsonData["data"];
@@ -347,7 +346,7 @@ namespace Binance.Net.Clients.SpotApi
             return result;
         }
         #endregion
-
+         
         #region Query Order
 
         /// <inheritdoc />
@@ -438,7 +437,7 @@ namespace Binance.Net.Clients.SpotApi
             var rulesCheck = await _baseClient.CheckTradeRules(symbol, quantity, null, price, stopPrice, null, ct).ConfigureAwait(false);
             if (!rulesCheck.Passed)
             {
-                _log.Write(LogLevel.Warning, rulesCheck.ErrorMessage!);
+                _logger.Log(LogLevel.Warning, rulesCheck.ErrorMessage!);
                 return new WebCallResult<BinanceOrderOcoList>(new ArgumentError(rulesCheck.ErrorMessage!));
             }
 
@@ -784,7 +783,7 @@ namespace Binance.Net.Clients.SpotApi
             var rulesCheck = await _baseClient.CheckTradeRules(symbol, quantity, null, price, stopPrice, null, ct).ConfigureAwait(false);
             if (!rulesCheck.Passed)
             {
-                _log.Write(LogLevel.Warning, rulesCheck.ErrorMessage!);
+                _logger.Log(LogLevel.Warning, rulesCheck.ErrorMessage!);
                 return new WebCallResult<BinanceMarginOrderOcoList>(new ArgumentError(rulesCheck.ErrorMessage!));
             }
 

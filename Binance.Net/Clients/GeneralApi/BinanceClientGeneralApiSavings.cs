@@ -10,7 +10,6 @@ using Binance.Net.Interfaces.Clients.GeneralApi;
 using Binance.Net.Objects.Models.Spot.Lending;
 using CryptoExchange.Net;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using Newtonsoft.Json;
 

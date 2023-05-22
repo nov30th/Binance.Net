@@ -8,9 +8,9 @@ using Binance.Net.Interfaces.Clients.SpotApi;
 using Binance.Net.Objects;
 using Binance.Net.Objects.Internal;
 using Binance.Net.Objects.Models.Spot;
+using Binance.Net.Objects.Options;
 using CryptoExchange.Net;
 using CryptoExchange.Net.Authentication;
-using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Sockets;
 using Microsoft.Extensions.Logging;
@@ -23,8 +23,8 @@ namespace Binance.Net.Clients.SpotApi
     public class BinanceSocketClientSpotApi : SocketApiClient, IBinanceSocketClientSpotApi
     {
         #region fields
-        internal BinanceSocketClientOptions ClientOptions { get; }
-        internal new readonly BinanceSocketApiClientOptions Options;
+        internal new BinanceSocketOptions ClientOptions { get; }
+        internal new readonly BinanceSocketApiOptions Options;
 
         internal BinanceExchangeInfo? ExchangeInfo;
         internal DateTime? LastExchangeInfoUpdate;
@@ -39,18 +39,18 @@ namespace Binance.Net.Clients.SpotApi
 
         #region constructor/destructor
 
-        internal BinanceSocketClientSpotApi(Log log, BinanceSocketClientOptions options) :
-            base(log, options, options.SpotApiOptions)
+        internal BinanceSocketClientSpotApi(ILogger logger, BinanceSocketOptions options) :
+            base(logger, ((BinanceEnvironment)options.Environment).SpotSocketAddress, options, options.SpotOptions)
         {
-            Options = options.SpotApiOptions;
-            ClientOptions = options;
+            Options = options.SpotOptions;
+            ClientOptions = options; 
 
             SetDataInterpreter((data) => string.Empty, null);
             RateLimitPerSocketPerSecond = 4;
 
-            Account = new BinanceSocketClientSpotApiAccount(log, this);
-            ExchangeData = new BinanceSocketClientSpotApiExchangeData(log, this);
-            Trading = new BinanceSocketClientSpotApiTrading(log, this);
+            Account = new BinanceSocketClientSpotApiAccount(logger, this);
+            ExchangeData = new BinanceSocketClientSpotApiExchangeData(logger, this);
+            Trading = new BinanceSocketClientSpotApiTrading(logger, this);
         }
         #endregion
 
@@ -140,7 +140,7 @@ namespace Binance.Net.Clients.SpotApi
             var result = message["result"];
             if (result != null && result.Type == JTokenType.Null)
             {
-                _log.Write(LogLevel.Trace, $"Socket {s.SocketId} Subscription completed");
+                _logger.Log(LogLevel.Trace, $"Socket {s.SocketId} Subscription completed");
                 callResult = new CallResult<object>(new object());
                 return true;
             }
@@ -192,7 +192,7 @@ namespace Binance.Net.Clients.SpotApi
             if (!connection.Connected)
                 return true;
 
-            await connection.SendAndWaitAsync(unsub, Options.SocketResponseTimeout, null, data =>
+            await connection.SendAndWaitAsync(unsub, ClientOptions.RequestTimeout, null, data =>
             {
                 if (data.Type != JTokenType.Object)
                     return false;
@@ -227,7 +227,7 @@ namespace Binance.Net.Clients.SpotApi
             if (ExchangeInfo == null)
                 return BinanceTradeRuleResult.CreateFailed("Unable to retrieve trading rules, validation failed");
 
-            return BinanceHelpers.ValidateTradeRules(_log, Options.TradeRulesBehaviour, ExchangeInfo, symbol, quantity, quoteQuantity, price, stopPrice, type);
+            return BinanceHelpers.ValidateTradeRules(_logger, Options.TradeRulesBehaviour, ExchangeInfo, symbol, quantity, quoteQuantity, price, stopPrice, type);
         }
 
     }

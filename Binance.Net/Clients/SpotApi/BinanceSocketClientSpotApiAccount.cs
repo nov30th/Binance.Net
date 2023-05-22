@@ -7,7 +7,6 @@ using Binance.Net.Objects.Models.Spot.Socket;
 using CryptoExchange.Net.Sockets;
 using CryptoExchange.Net;
 using CryptoExchange.Net.Objects;
-using CryptoExchange.Net.Logging;
 using System.Collections.Generic;
 using Binance.Net.Objects.Models.Spot;
 using CryptoExchange.Net.Converters;
@@ -28,14 +27,14 @@ namespace Binance.Net.Clients.SpotApi
 
         private const string _baseAddressWebsocketApi = "wss://ws-api.binance.com:443/ws-api/v3";
 
-        private readonly Log _log;
+        private readonly ILogger _logger;
 
         #region constructor/destructor
 
-        internal BinanceSocketClientSpotApiAccount(Log log, BinanceSocketClientSpotApi client)
+        internal BinanceSocketClientSpotApiAccount(ILogger logger, BinanceSocketClientSpotApi client)
         {
             _client = client;
-            _log = log;
+            _logger = logger;
         }
 
         #endregion
@@ -148,7 +147,7 @@ namespace Binance.Net.Clients.SpotApi
                             }
                             else
                             {
-                                _log.Write(LogLevel.Warning,
+                                _logger.Log(LogLevel.Warning,
                                     "Couldn't deserialize data received from order stream: " + result.Error);
                             }
 
@@ -164,7 +163,7 @@ namespace Binance.Net.Clients.SpotApi
                             }
                             else
                             {
-                                _log.Write(LogLevel.Warning,
+                                _logger.Log(LogLevel.Warning,
                                     "Couldn't deserialize data received from oco order stream: " + result.Error);
                             }
 
@@ -180,7 +179,7 @@ namespace Binance.Net.Clients.SpotApi
                             }
                             else
                             {
-                                _log.Write(LogLevel.Warning,
+                                _logger.Log(LogLevel.Warning,
                                     "Couldn't deserialize data received from account position stream: " + result.Error);
                             }
 
@@ -196,19 +195,19 @@ namespace Binance.Net.Clients.SpotApi
                             }
                             else
                             {
-                                _log.Write(LogLevel.Warning,
+                                _logger.Log(LogLevel.Warning,
                                     "Couldn't deserialize data received from account position stream: " + result.Error);
                             }
 
                             break;
                         }
                     default:
-                        _log.Write(LogLevel.Warning, $"Received unknown user data event {evnt}: " + data);
+                        _logger.Log(LogLevel.Warning, $"Received unknown user data event {evnt}: " + data);
                         break;
                 }
             });
 
-            return await _client.SubscribeAsync(_client.Options.BaseAddress, new[] { listenKey }, handler, ct).ConfigureAwait(false);
+            return await _client.SubscribeAsync(_client.BaseAddress, new[] { listenKey }, handler, ct).ConfigureAwait(false);
         }
         #endregion
 

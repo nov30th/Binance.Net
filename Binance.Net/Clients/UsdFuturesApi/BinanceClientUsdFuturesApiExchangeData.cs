@@ -13,7 +13,6 @@ using Binance.Net.Objects.Models.Futures;
 using Binance.Net.Objects.Models.Spot;
 using CryptoExchange.Net;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -56,13 +55,13 @@ namespace Binance.Net.Clients.UsdFuturesApi
         private const string publicVersion = "1";
         private const string tradingDataapi = "futures/data";
 
-        private readonly Log _log;
+        private readonly ILogger _logger;
 
         private readonly BinanceClientUsdFuturesApi _baseClient;
 
-        internal BinanceClientUsdFuturesApiExchangeData(Log log, BinanceClientUsdFuturesApi baseClient)
+        internal BinanceClientUsdFuturesApiExchangeData(ILogger logger, BinanceClientUsdFuturesApi baseClient)
         {
-            _log = log;
+            _logger = logger;
             _baseClient = baseClient;
         }
 
@@ -102,7 +101,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
 
             _baseClient.ExchangeInfo = exchangeInfoResult.Data;
             _baseClient.LastExchangeInfoUpdate = DateTime.UtcNow;
-            _log.Write(LogLevel.Information, "Trade rules updated");
+            _logger.Log(LogLevel.Information, "Trade rules updated");
             return exchangeInfoResult;
         }
 
