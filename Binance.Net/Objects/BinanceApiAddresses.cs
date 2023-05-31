@@ -42,7 +42,7 @@
         {
             RestClientAddress = "https://api.binance.com",
             SocketClientAddress = "wss://stream.binance.com:9443/",
-            BlvtSocketClientAddress = "wss://nbstream.binance.com/lvt-p",
+            BlvtSocketClientAddress = "wss://nbstream.binance.com/",
             UsdFuturesRestClientAddress = "https://fapi.binance.com",
             UsdFuturesSocketClientAddress = "wss://fstream.binance.com/",
             CoinFuturesRestClientAddress = "https://dapi.binance.com",

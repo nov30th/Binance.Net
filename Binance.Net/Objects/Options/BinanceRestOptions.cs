@@ -10,7 +10,7 @@ namespace Binance.Net.Objects.Options
     /// <summary>
     /// Options for the BinanceRestClient
     /// </summary>
-    public class BinanceRestOptions : RestExchangeOptions
+    public class BinanceRestOptions : RestExchangeOptions<BinanceEnvironment>
     {
         /// <summary>
         /// Default options for new clients

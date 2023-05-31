@@ -491,11 +491,11 @@ namespace Binance.Net.Clients.SpotApi
         {
             var address = ((BinanceEnvironment)_client.ClientOptions.Environment).BlvtSocketAddress;
             if (address == null)
-                throw new Exception("No url found for Blvt stream, check the `BlvtSocketAddress` client option");
+                throw new Exception("No url found for Blvt stream, check the `BlvtSocketAddress` in the client environment");
 
             tokens = tokens.Select(a => a.ToUpper(CultureInfo.InvariantCulture) + "@tokenNav").ToArray();
             var handler = new Action<DataEvent<BinanceCombinedStream<BinanceBlvtInfoUpdate>>>(data => onMessage(data.As(data.Data.Data, data.Data.Data.TokenName)));
-            return await _client.SubscribeAsync(address, tokens, handler, ct).ConfigureAwait(false);
+            return await _client.SubscribeAsync(address.AppendPath("lvt-p"), tokens, handler, ct).ConfigureAwait(false);
         }
 
         #endregion
@@ -511,11 +511,11 @@ namespace Binance.Net.Clients.SpotApi
         {
             var address = ((BinanceEnvironment)_client.ClientOptions.Environment).BlvtSocketAddress;
             if (address == null)
-                throw new Exception("No url found for Blvt stream, check the `BlvtSocketAddress` client option");
+                throw new Exception("No url found for Blvt stream, check the `BlvtSocketAddress` in the client environment");
 
             tokens = tokens.Select(a => a.ToUpper(CultureInfo.InvariantCulture) + "@nav_kline" + "_" + JsonConvert.SerializeObject(interval, new KlineIntervalConverter(false))).ToArray();
             var handler = new Action<DataEvent<BinanceCombinedStream<BinanceStreamKlineData>>>(data => onMessage(data.As(data.Data.Data, data.Data.Data.Symbol)));
-            return await _client.SubscribeAsync(address, tokens, handler, ct).ConfigureAwait(false);
+            return await _client.SubscribeAsync(address.AppendPath("lvt-p"), tokens, handler, ct).ConfigureAwait(false);
         }
 
         #endregion

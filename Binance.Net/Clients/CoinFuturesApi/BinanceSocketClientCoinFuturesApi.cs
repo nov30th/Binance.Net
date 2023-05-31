@@ -59,7 +59,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
         #region constructor/destructor
 
         internal BinanceSocketClientCoinFuturesApi(ILogger logger, BinanceSocketOptions options) :
-            base(logger, ((BinanceEnvironment)options.Environment).CoinFuturesSocketAddress!, options, options.CoinFuturesOptions)
+            base(logger, options.Environment.CoinFuturesSocketAddress!, options, options.CoinFuturesOptions)
         {
             SetDataInterpreter((data) => string.Empty, null);
             RateLimitPerSocketPerSecond = 4;

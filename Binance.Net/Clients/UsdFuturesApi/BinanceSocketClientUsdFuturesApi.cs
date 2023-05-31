@@ -65,7 +65,7 @@ namespace Binance.Net.Clients.UsdFuturesApi
         /// Create a new instance of BinanceSocketClientUsdFuturesStreams
         /// </summary>
         internal BinanceSocketClientUsdFuturesApi(ILogger logger, BinanceSocketOptions options) :
-            base(logger, ((BinanceEnvironment)options.Environment).UsdFuturesSocketAddress!, options, options.UsdFuturesOptions)
+            base(logger, options.Environment.UsdFuturesSocketAddress!, options, options.UsdFuturesOptions)
         {
             SetDataInterpreter((data) => string.Empty, null);
             RateLimitPerSocketPerSecond = 4;

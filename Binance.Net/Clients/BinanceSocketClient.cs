@@ -36,8 +36,8 @@ namespace Binance.Net.Clients
         /// <summary>
         /// Create a new instance of BinanceSocketClient
         /// </summary>
-        /// <param name="logger">The logger</param>
-        public BinanceSocketClient(ILogger<BinanceSocketClient>? logger = null) : this((x) => { }, logger)
+        /// <param name="loggerFactory">The logger factory</param>
+        public BinanceSocketClient(ILoggerFactory? loggerFactory = null) : this((x) => { }, loggerFactory)
         {
         }
 
@@ -52,9 +52,9 @@ namespace Binance.Net.Clients
         /// <summary>
         /// Create a new instance of BinanceSocketClient
         /// </summary>
-        /// <param name="logger">The logger</param>
+        /// <param name="loggerFactory">The logger factory</param>
         /// <param name="optionsDelegate">Option configuration delegate</param>
-        public BinanceSocketClient(Action<BinanceSocketOptions> optionsDelegate, ILogger<BinanceSocketClient>? logger = null) : base(logger, "Binance")
+        public BinanceSocketClient(Action<BinanceSocketOptions> optionsDelegate, ILoggerFactory? loggerFactory = null) : base(loggerFactory, "Binance")
         {
             var options = BinanceSocketOptions.Default.Copy();
             optionsDelegate(options);

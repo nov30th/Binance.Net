@@ -15,19 +15,19 @@ namespace Binance.Net.Interfaces.Clients
         /// <summary>
         /// General API endpoints
         /// </summary>
-        IBinanceClientGeneralApi GeneralApi { get; }
+        IBinanceRestClientGeneralApi GeneralApi { get; }
         /// <summary>
         /// Coin futures API endpoints
         /// </summary>
-        IBinanceClientCoinFuturesApi CoinFuturesApi { get; }
+        IBinanceRestClientCoinFuturesApi CoinFuturesApi { get; }
         /// <summary>
         /// Spot API endpoints
         /// </summary>
-        IBinanceClientSpotApi SpotApi { get; }
+        IBinanceRestClientSpotApi SpotApi { get; }
         /// <summary>
         /// Usd futures API endpoints
         /// </summary>
-        IBinanceClientUsdFuturesApi UsdFuturesApi { get; }
+        IBinanceRestClientUsdFuturesApi UsdFuturesApi { get; }
 
         /// <summary>
         /// Set the API credentials for this client. All Api clients in this client will use the new credentials, regardless of earlier set options.

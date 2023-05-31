@@ -1,6 +1,5 @@
 ﻿using Binance.Net.Objects;
 using CryptoExchange.Net.Objects;
-using System.Collections.Generic;
 
 namespace Binance.Net
 {
@@ -12,37 +11,37 @@ namespace Binance.Net
         /// <summary>
         /// Spot Rest API address
         /// </summary>
-        public string SpotRestAddress => Addresses["SpotRest"]!;
+        public string SpotRestAddress { get; }
 
         /// <summary>
         /// Spot Socket API address
         /// </summary>
-        public string SpotSocketAddress => Addresses["SpotSocket"]!;
+        public string SpotSocketAddress { get; }
 
         /// <summary>
         /// Blvt Socket API address
         /// </summary>
-        public string? BlvtSocketAddress => Addresses["BlvtSocket"];
+        public string? BlvtSocketAddress { get; }
 
         /// <summary>
         /// Usd futures Rest address
         /// </summary>
-        public string? UsdFuturesRestAddress => Addresses["UsdFuturesRest"];
+        public string? UsdFuturesRestAddress { get; }
 
         /// <summary>
         /// Usd futures Socket address
         /// </summary>
-        public string? UsdFuturesSocketAddress => Addresses["UsdFuturesSocket"];
+        public string? UsdFuturesSocketAddress { get; }
 
         /// <summary>
         /// Coin futures Rest address
         /// </summary>
-        public string? CoinFuturesRestAddress => Addresses["CoinFuturesRest"];
+        public string? CoinFuturesRestAddress { get; }
 
         /// <summary>
         /// Coin futures Socket address
         /// </summary>
-        public string? CoinFuturesSocketAddress => Addresses["CoinFuturesSocket"];
+        public string? CoinFuturesSocketAddress { get; }
 
         internal BinanceEnvironment(
             string name, 
@@ -53,23 +52,21 @@ namespace Binance.Net
             string? usdFuturesSocketAddress,
             string? coinFuturesRestAddress,
             string? coinFuturesSocketAddress) :
-            base(name, new Dictionary<string, string?>
-                {
-                    { "SpotRest", spotRestAddress },
-                    { "SpotSocket", spotSocketAddress },
-                    { "BlvtSocket", blvtSocketAddress },
-                    { "UsdFuturesRest", usdFuturesRestAddress },
-                    { "UsdFuturesSocket", usdFuturesSocketAddress },
-                    { "CoinFuturesRest", coinFuturesRestAddress },
-                    { "CoinFuturesSocket", coinFuturesSocketAddress },
-                })
+            base(name)
         {
+            SpotRestAddress = spotRestAddress;
+            SpotSocketAddress = spotSocketAddress;
+            BlvtSocketAddress = blvtSocketAddress;
+            UsdFuturesRestAddress = usdFuturesRestAddress;
+            UsdFuturesSocketAddress = usdFuturesSocketAddress;
+            CoinFuturesRestAddress = coinFuturesRestAddress;
+            CoinFuturesSocketAddress = coinFuturesSocketAddress;
         }
 
         /// <summary>
         /// Live environment
         /// </summary>
-        public static TradeEnvironment Live { get; } 
+        public static BinanceEnvironment Live { get; } 
             = new BinanceEnvironment(TradeEnvironmentNames.Live, 
                                      BinanceApiAddresses.Default.RestClientAddress,
                                      BinanceApiAddresses.Default.SocketClientAddress,
@@ -82,7 +79,7 @@ namespace Binance.Net
         /// <summary>
         /// Testnet environment
         /// </summary>
-        public static TradeEnvironment TestNet { get; }
+        public static BinanceEnvironment Testnet { get; }
             = new BinanceEnvironment(TradeEnvironmentNames.Testnet,
                                      BinanceApiAddresses.TestNet.RestClientAddress,
                                      BinanceApiAddresses.TestNet.SocketClientAddress,
@@ -95,7 +92,7 @@ namespace Binance.Net
         /// <summary>
         /// Binance.us environment
         /// </summary>
-        public static TradeEnvironment Us { get; }
+        public static BinanceEnvironment Us { get; }
             = new BinanceEnvironment("Us",
                                      BinanceApiAddresses.Us.RestClientAddress,
                                      BinanceApiAddresses.Us.SocketClientAddress,
@@ -117,7 +114,7 @@ namespace Binance.Net
         /// <param name="coinFuturesRestAddress"></param>
         /// <param name="coinFuturesSocketAddress"></param>
         /// <returns></returns>
-        public static TradeEnvironment CreateCustom(
+        public static BinanceEnvironment CreateCustom(
                         string name,
                         string spotRestAddress,
                         string spotSocketAddress,
