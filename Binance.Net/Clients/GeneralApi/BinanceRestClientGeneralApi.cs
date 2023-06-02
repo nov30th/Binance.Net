@@ -19,7 +19,11 @@ namespace Binance.Net.Clients.GeneralApi
     public class BinanceRestClientGeneralApi : RestApiClient, IBinanceRestClientGeneralApi
     {
         #region fields 
-        internal new readonly BinanceRestOptions Options;
+        /// <inheritdoc />
+        public new BinanceRestApiOptions ApiOptions => (BinanceRestApiOptions)base.ApiOptions;
+        /// <inheritdoc />
+        public new BinanceRestOptions ClientOptions => (BinanceRestOptions)base.ClientOptions;
+
         private readonly BinanceRestClient _baseClient;
         #endregion
 
@@ -44,7 +48,6 @@ namespace Binance.Net.Clients.GeneralApi
             : base(logger, httpClient, options.Environment.SpotRestAddress, options, options.SpotOptions)
         {
             _baseClient = baseClient;
-            Options = options;
 
             Brokerage = new BinanceRestClientGeneralApiBrokerage(this);
             Futures = new BinanceRestClientGeneralApiFutures(this);
@@ -79,10 +82,10 @@ namespace Binance.Net.Clients.GeneralApi
             ArrayParametersSerialization? arraySerialization = null, int weight = 1, bool ignoreRateLimit = false) where T : class
         {
             var result = await SendRequestAsync<T>(uri, method, cancellationToken, parameters, signed, postPosition, arraySerialization, weight, ignoreRatelimit: ignoreRateLimit).ConfigureAwait(false);
-            if (!result && result.Error!.Code == -1021 && Options.SpotOptions.AutoTimestamp)
+            if (!result && result.Error!.Code == -1021 && ApiOptions.AutoTimestamp)
             {
                 _logger.Log(LogLevel.Debug, "Received Invalid Timestamp error, triggering new time sync");
-                BinanceRestClientSpotApi.TimeSyncState.LastSyncTime = DateTime.MinValue;
+                BinanceRestClientSpotApi._timeSyncState.LastSyncTime = DateTime.MinValue;
             }
             return result;
         }
@@ -94,11 +97,11 @@ namespace Binance.Net.Clients.GeneralApi
 
         /// <inheritdoc />
         public override TimeSyncInfo? GetTimeSyncInfo()
-            => new TimeSyncInfo(_logger, Options.SpotOptions.AutoTimestamp, Options.SpotOptions.TimestampRecalculationInterval, BinanceRestClientSpotApi.TimeSyncState);
+            => new TimeSyncInfo(_logger, ApiOptions.AutoTimestamp, ApiOptions.TimestampRecalculationInterval, BinanceRestClientSpotApi._timeSyncState);
 
         /// <inheritdoc />
         public override TimeSpan? GetTimeOffset()
-            => BinanceRestClientSpotApi.TimeSyncState.TimeOffset;
+            => BinanceRestClientSpotApi._timeSyncState.TimeOffset;
 
         /// <inheritdoc />
         protected override Error ParseErrorResponse(JToken error)

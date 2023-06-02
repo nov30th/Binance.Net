@@ -23,11 +23,13 @@ namespace Binance.Net.Clients.SpotApi
     public class BinanceSocketClientSpotApi : SocketApiClient, IBinanceSocketClientSpotApi
     {
         #region fields
-        internal new BinanceSocketOptions ClientOptions { get; }
-        internal new readonly BinanceSocketApiOptions Options;
+        /// <inheritdoc />
+        public new BinanceSocketOptions ClientOptions => (BinanceSocketOptions)base.ClientOptions;
+        /// <inheritdoc />
+        public new BinanceSocketApiOptions ApiOptions => (BinanceSocketApiOptions)base.ApiOptions;
 
-        internal BinanceExchangeInfo? ExchangeInfo;
-        internal DateTime? LastExchangeInfoUpdate;
+        internal BinanceExchangeInfo? _exchangeInfo;
+        internal DateTime? _lastExchangeInfoUpdate;
         #endregion
 
         /// <inheritdoc />
@@ -42,9 +44,6 @@ namespace Binance.Net.Clients.SpotApi
         internal BinanceSocketClientSpotApi(ILogger logger, BinanceSocketOptions options) :
             base(logger, options.Environment.SpotSocketAddress, options, options.SpotOptions)
         {
-            Options = options.SpotOptions;
-            ClientOptions = options; 
-
             SetDataInterpreter((data) => string.Empty, null);
             RateLimitPerSocketPerSecond = 4;
 
@@ -74,17 +73,17 @@ namespace Binance.Net.Clients.SpotApi
         {
             if (authenticated)
             {
-                if (AuthenticationProvider?.Credentials?.Key == null)
+                if (AuthenticationProvider == null)
                     throw new InvalidOperationException("No credentials provided for authenticated endpoint");
 
+                var authProvider = (BinanceAuthenticationProvider)AuthenticationProvider;
                 if (sign)
                 {
-                    var authProvider = (BinanceAuthenticationProvider)AuthenticationProvider;
                     parameters = authProvider.AuthenticateSocketParameters(parameters);
                 }
                 else
                 {
-                    parameters.Add("apiKey", AuthenticationProvider.Credentials.Key.GetString());
+                    parameters.Add("apiKey", authProvider.GetApiKey());
                 }
             }
 
@@ -218,16 +217,16 @@ namespace Binance.Net.Clients.SpotApi
 
         internal async Task<BinanceTradeRuleResult> CheckTradeRules(string symbol, decimal? quantity, decimal? quoteQuantity, decimal? price, decimal? stopPrice, SpotOrderType? type)
         {
-            if (Options.TradeRulesBehaviour == TradeRulesBehaviour.None)
+            if (ApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.None)
                 return BinanceTradeRuleResult.CreatePassed(quantity, quoteQuantity, price, stopPrice);
 
-            if (ExchangeInfo == null || LastExchangeInfoUpdate == null || (DateTime.UtcNow - LastExchangeInfoUpdate.Value).TotalMinutes > Options.TradeRulesUpdateInterval.TotalMinutes)
+            if (_exchangeInfo == null || _lastExchangeInfoUpdate == null || (DateTime.UtcNow - _lastExchangeInfoUpdate.Value).TotalMinutes > ApiOptions.TradeRulesUpdateInterval.TotalMinutes)
                 await ExchangeData.GetExchangeInfoAsync().ConfigureAwait(false);
 
-            if (ExchangeInfo == null)
+            if (_exchangeInfo == null)
                 return BinanceTradeRuleResult.CreateFailed("Unable to retrieve trading rules, validation failed");
 
-            return BinanceHelpers.ValidateTradeRules(_logger, Options.TradeRulesBehaviour, ExchangeInfo, symbol, quantity, quoteQuantity, price, stopPrice, type);
+            return BinanceHelpers.ValidateTradeRules(_logger, ApiOptions.TradeRulesBehaviour, _exchangeInfo, symbol, quantity, quoteQuantity, price, stopPrice, type);
         }
 
     }

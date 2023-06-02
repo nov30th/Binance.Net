@@ -152,8 +152,8 @@ namespace Binance.Net.Clients.SpotApi
             if (!exchangeInfoResult)
                 return exchangeInfoResult;
 
-            _baseClient.ExchangeInfo = exchangeInfoResult.Data;
-            _baseClient.LastExchangeInfoUpdate = DateTime.UtcNow;
+            _baseClient._exchangeInfo = exchangeInfoResult.Data;
+            _baseClient._lastExchangeInfoUpdate = DateTime.UtcNow;
             _logger.Log(LogLevel.Information, "Trade rules updated");
             return exchangeInfoResult;
         }
@@ -176,8 +176,8 @@ namespace Binance.Net.Clients.SpotApi
             if (!exchangeInfoResult)
                 return exchangeInfoResult;
 
-            _baseClient.ExchangeInfo = exchangeInfoResult.Data;
-            _baseClient.LastExchangeInfoUpdate = DateTime.UtcNow;
+            _baseClient._exchangeInfo = exchangeInfoResult.Data;
+            _baseClient._lastExchangeInfoUpdate = DateTime.UtcNow;
             _logger.Log(LogLevel.Information, "Trade rules updated");
             return exchangeInfoResult;
         }
@@ -198,7 +198,7 @@ namespace Binance.Net.Clients.SpotApi
         public async Task<WebCallResult<Dictionary<string, BinanceAssetDetails>>> GetAssetDetailsAsync(int? receiveWindow = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
-            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             var result = await _baseClient.SendRequestInternal<Dictionary<string, BinanceAssetDetails>>(_baseClient.GetUrl(assetDetailsEndpoint, "sapi", "1"), HttpMethod.Get, ct, parameters, true).ConfigureAwait(false);
             return result;
@@ -210,7 +210,7 @@ namespace Binance.Net.Clients.SpotApi
         /// <inheritdoc />
         public async Task<WebCallResult<IEnumerable<BinanceProduct>>> GetProductsAsync(CancellationToken ct = default)
         {
-            var url = ((BinanceEnvironment)_baseClient.Options.Environment).SpotRestAddress.Replace("api.", "www.").AppendPath("exchange-api/v2/public/asset-service/product/get-products");
+            var url = ((BinanceEnvironment)_baseClient.ClientOptions.Environment).SpotRestAddress.Replace("api.", "www.").AppendPath("exchange-api/v2/public/asset-service/product/get-products");
 
             var data = await _baseClient.SendRequestInternal<BinanceExchangeApiWrapper<IEnumerable<BinanceProduct>>>(new Uri(url), HttpMethod.Get, ct).ConfigureAwait(false);
             if (!data)
@@ -488,7 +488,7 @@ namespace Binance.Net.Clients.SpotApi
             symbol?.ValidateBinanceSymbol();
             var parameters = new Dictionary<string, object>();
             parameters.AddOptionalParameter("symbol", symbol);
-            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             var result = await _baseClient.SendRequestInternal<IEnumerable<BinanceTradeFee>>(_baseClient.GetUrl(tradeFeeEndpoint, "sapi", "1"), HttpMethod.Get, ct, parameters, true).ConfigureAwait(false);
             return result;
@@ -577,7 +577,7 @@ namespace Binance.Net.Clients.SpotApi
 
             parameters.AddOptionalParameter("recvWindow",
                 receiveWindow?.ToString(CultureInfo.InvariantCulture) ??
-                _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             return await _baseClient
                 .SendRequestInternal<BinanceIsolatedMarginSymbol>(
@@ -592,7 +592,7 @@ namespace Binance.Net.Clients.SpotApi
             var parameters = new Dictionary<string, object>();
             parameters.AddOptionalParameter("recvWindow", receiveWindow
                                                               ?.ToString(CultureInfo.InvariantCulture) ??
-                                                          _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(
+                                                          _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(
                                                               CultureInfo.InvariantCulture));
 
             return await _baseClient.SendRequestInternal<IEnumerable<BinanceIsolatedMarginSymbol>>(_baseClient.GetUrl(isolatedMarginAllSymbolEndpoint, "sapi", "1"), HttpMethod.Get, ct, parameters, true, weight: 10)
@@ -609,7 +609,7 @@ namespace Binance.Net.Clients.SpotApi
         public async Task<WebCallResult<IEnumerable<BinanceBlvtInfo>>> GetLeveragedTokenInfoAsync(int? receiveWindow = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
-            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             return await _baseClient.SendRequestInternal<IEnumerable<BinanceBlvtInfo>>(_baseClient.GetUrl(blvtInfoEndpoint, BlvtApi, blvtVersion), HttpMethod.Get, ct, parameters).ConfigureAwait(false);
         }
@@ -630,7 +630,7 @@ namespace Binance.Net.Clients.SpotApi
             };
             parameters.AddOptionalParameter("startTime", DateTimeConverter.ConvertToMilliseconds(startTime));
             parameters.AddOptionalParameter("endTime", DateTimeConverter.ConvertToMilliseconds(endTime));
-            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             return await _baseClient.SendRequestInternal<IEnumerable<BinanceBlvtKline>>(_baseClient.GetUrl(blvtHistoricalKlinesEndpoint, "fapi", blvtVersion), HttpMethod.Get, ct, parameters).ConfigureAwait(false);
         }
@@ -647,7 +647,7 @@ namespace Binance.Net.Clients.SpotApi
         public async Task<WebCallResult<IEnumerable<BinanceBSwapPool>>> GetLiquidityPoolsAsync(int? receiveWindow = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
-            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             return await _baseClient.SendRequestInternal<IEnumerable<BinanceBSwapPool>>(_baseClient.GetUrl(bSwapPoolsEndpoint, bSwapApi, bSwapVersion), HttpMethod.Get, ct, parameters).ConfigureAwait(false);
         }
@@ -663,7 +663,7 @@ namespace Binance.Net.Clients.SpotApi
             {
                 { "poolId", poolId }
             };
-            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             return await _baseClient.SendRequestInternal<IEnumerable<BinanceBSwapPoolConfig>>(_baseClient.GetUrl(bSwapPoolsConfigureEndpoint, bSwapApi, bSwapVersion), HttpMethod.Get, ct, parameters, signed: true, weight: 150).ConfigureAwait(false);
         }
@@ -684,7 +684,7 @@ namespace Binance.Net.Clients.SpotApi
             parameters.AddOptionalParameter("asset", asset);
             parameters.AddOptionalParameter("current", page);
             parameters.AddOptionalParameter("size", limit);
-            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             return await _baseClient.SendRequestInternal<IEnumerable<BinanceStakingProduct>>(_baseClient.GetUrl(stakingProductListEndpoint, "sapi", "1"), HttpMethod.Get, ct, parameters, true).ConfigureAwait(false);
         }
@@ -697,7 +697,7 @@ namespace Binance.Net.Clients.SpotApi
         public async Task<WebCallResult<IEnumerable<BinanceCrossMarginCollateralRatio>>> GetCrossMarginCollateralRatioAsync(int? receiveWindow = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
-            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? _baseClient.ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             return await _baseClient.SendRequestInternal<IEnumerable<BinanceCrossMarginCollateralRatio>>(_baseClient.GetUrl("margin/crossMarginCollateralRatio", "sapi", "1"), HttpMethod.Get, ct, parameters, true, weight: 100).ConfigureAwait(false);
         }

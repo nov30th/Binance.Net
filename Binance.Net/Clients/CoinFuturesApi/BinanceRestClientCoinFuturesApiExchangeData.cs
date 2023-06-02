@@ -98,8 +98,8 @@ namespace Binance.Net.Clients.CoinFuturesApi
             if (!exchangeInfoResult)
                 return exchangeInfoResult;
 
-            _baseClient.ExchangeInfo = exchangeInfoResult.Data;
-            _baseClient.LastExchangeInfoUpdate = DateTime.UtcNow;
+            _baseClient._exchangeInfo = exchangeInfoResult.Data;
+            _baseClient._lastExchangeInfoUpdate = DateTime.UtcNow;
             _logger.Log(LogLevel.Information, "Trade rules updated");
             return exchangeInfoResult;
         }

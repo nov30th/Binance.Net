@@ -28,12 +28,15 @@ namespace Binance.Net.Clients.SpotApi
     public class BinanceRestClientSpotApi : RestApiClient, IBinanceRestClientSpotApi, ISpotClient
     {
         #region fields 
-        internal new readonly BinanceRestOptions Options;
+        /// <inheritdoc />
+        public new BinanceRestApiOptions ApiOptions => (BinanceRestApiOptions)base.ApiOptions;
+        /// <inheritdoc />
+        public new BinanceRestOptions ClientOptions => (BinanceRestOptions)base.ClientOptions;
 
-        internal BinanceExchangeInfo? ExchangeInfo;
-        internal DateTime? LastExchangeInfoUpdate;
+        internal BinanceExchangeInfo? _exchangeInfo;
+        internal DateTime? _lastExchangeInfoUpdate;
 
-        internal static TimeSyncState TimeSyncState = new TimeSyncState("Spot Api");
+        internal static TimeSyncState _timeSyncState = new TimeSyncState("Spot Api");
         #endregion
 
         #region Api clients
@@ -60,8 +63,6 @@ namespace Binance.Net.Clients.SpotApi
         internal BinanceRestClientSpotApi(ILogger logger, HttpClient? httpClient, BinanceRestOptions options)
             : base(logger, httpClient, options.Environment.SpotRestAddress, options, options.SpotOptions)
         {
-            Options = options;
-
             Account = new BinanceRestClientSpotApiAccount(this);
             ExchangeData = new BinanceRestClientSpotApiExchangeData(logger, this);
             Trading = new BinanceRestClientSpotApiTrading(logger, this);
@@ -140,7 +141,7 @@ namespace Binance.Net.Clients.SpotApi
             parameters.AddOptionalParameter("strategyId", strategyId);
             parameters.AddOptionalParameter("strategyType", strategyType);
             parameters.AddOptionalParameter("selfTradePreventionMode", EnumConverter.GetString(selfTradePreventionMode));
-            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? Options.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            parameters.AddOptionalParameter("recvWindow", receiveWindow?.ToString(CultureInfo.InvariantCulture) ?? ClientOptions.ReceiveWindow.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
 
             return await SendRequestInternal<BinancePlacedOrder>(uri, HttpMethod.Post, ct, parameters, true, weight: weight).ConfigureAwait(false);
         }
@@ -157,16 +158,16 @@ namespace Binance.Net.Clients.SpotApi
 
         internal async Task<BinanceTradeRuleResult> CheckTradeRules(string symbol, decimal? quantity, decimal? quoteQuantity, decimal? price, decimal? stopPrice, SpotOrderType? type, CancellationToken ct)
         {
-            if (Options.SpotOptions.TradeRulesBehaviour == TradeRulesBehaviour.None)
+            if (ApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.None)
                 return BinanceTradeRuleResult.CreatePassed(quantity, quoteQuantity, price, stopPrice);
 
-            if (ExchangeInfo == null || LastExchangeInfoUpdate == null || (DateTime.UtcNow - LastExchangeInfoUpdate.Value).TotalMinutes > Options.SpotOptions.TradeRulesUpdateInterval.TotalMinutes)
+            if (_exchangeInfo == null || _lastExchangeInfoUpdate == null || (DateTime.UtcNow - _lastExchangeInfoUpdate.Value).TotalMinutes > ApiOptions.TradeRulesUpdateInterval.TotalMinutes)
                 await ExchangeData.GetExchangeInfoAsync(ct).ConfigureAwait(false);
 
-            if (ExchangeInfo == null)
+            if (_exchangeInfo == null)
                 return BinanceTradeRuleResult.CreateFailed("Unable to retrieve trading rules, validation failed");
 
-            return BinanceHelpers.ValidateTradeRules(_logger, Options.SpotOptions.TradeRulesBehaviour, ExchangeInfo, symbol, quantity, quoteQuantity, price, stopPrice, type);
+            return BinanceHelpers.ValidateTradeRules(_logger, ApiOptions.TradeRulesBehaviour, _exchangeInfo, symbol, quantity, quoteQuantity, price, stopPrice, type);
         }
 
         internal async Task<WebCallResult<T>> SendRequestInternal<T>(Uri uri, HttpMethod method, CancellationToken cancellationToken,
@@ -174,10 +175,10 @@ namespace Binance.Net.Clients.SpotApi
             ArrayParametersSerialization? arraySerialization = null, int weight = 1, bool ignoreRateLimit = false) where T : class
         {
             var result = await SendRequestAsync<T>(uri, method, cancellationToken, parameters, signed, postPosition, arraySerialization, weight, ignoreRatelimit: ignoreRateLimit).ConfigureAwait(false);
-            if (!result && result.Error!.Code == -1021 && Options.SpotOptions.AutoTimestamp)
+            if (!result && result.Error!.Code == -1021 && ApiOptions.AutoTimestamp)
             {
                 _logger.Log(LogLevel.Debug, "Received Invalid Timestamp error, triggering new time sync");
-                TimeSyncState.LastSyncTime = DateTime.MinValue;
+                _timeSyncState.LastSyncTime = DateTime.MinValue;
             }
             return result;                    
         }
@@ -187,10 +188,10 @@ namespace Binance.Net.Clients.SpotApi
             ArrayParametersSerialization? arraySerialization = null, int weight = 1, bool ignoreRateLimit = false)
         {
             var result = await SendRequestAsync(uri, method, cancellationToken, parameters, signed, postPosition, arraySerialization, weight, ignoreRatelimit: ignoreRateLimit).ConfigureAwait(false);
-            if (!result && result.Error!.Code == -1021 && Options.SpotOptions.AutoTimestamp)
+            if (!result && result.Error!.Code == -1021 && ApiOptions.AutoTimestamp)
             {
                 _logger.Log(LogLevel.Debug, "Received Invalid Timestamp error, triggering new time sync");
-                TimeSyncState.LastSyncTime = DateTime.MinValue;
+                _timeSyncState.LastSyncTime = DateTime.MinValue;
             }
             return result;
         }
@@ -202,11 +203,11 @@ namespace Binance.Net.Clients.SpotApi
 
         /// <inheritdoc />
         public override TimeSyncInfo? GetTimeSyncInfo()
-            => new TimeSyncInfo(_logger, Options.SpotOptions.AutoTimestamp, Options.SpotOptions.TimestampRecalculationInterval, TimeSyncState);
+            => new TimeSyncInfo(_logger, ApiOptions.AutoTimestamp, ApiOptions.TimestampRecalculationInterval, _timeSyncState);
 
         /// <inheritdoc />
         public override TimeSpan? GetTimeOffset()
-            => TimeSyncState.TimeOffset;
+            => _timeSyncState.TimeOffset;
 
         /// <inheritdoc />
         public ISpotClient CommonSpotClient => this;

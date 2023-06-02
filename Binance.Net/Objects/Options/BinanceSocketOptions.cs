@@ -5,7 +5,7 @@ namespace Binance.Net.Objects.Options
     /// <summary>
     /// Options for the BinanceSocketClient
     /// </summary>
-    public class BinanceSocketOptions : SocketExchangeOptions<BinanceEnvironment>
+    public class BinanceSocketOptions : SocketExchangeOptions<BinanceEnvironment, BinanceApiCredentials>
     {
         /// <summary>
         /// Default options for new clients
@@ -15,13 +15,6 @@ namespace Binance.Net.Objects.Options
             Environment = BinanceEnvironment.Live,
             SocketSubscriptionsCombineTarget = 10
         };
-
-        /// <inheritdoc />
-        public new BinanceApiCredentials? ApiCredentials
-        {
-            get => (BinanceApiCredentials?)base.ApiCredentials;
-            set => base.ApiCredentials = value;
-        }
 
         /// <summary>
         /// Options for the Spot API

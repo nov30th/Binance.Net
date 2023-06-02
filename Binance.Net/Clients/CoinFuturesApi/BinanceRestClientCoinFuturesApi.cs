@@ -25,12 +25,15 @@ namespace Binance.Net.Clients.CoinFuturesApi
     public class BinanceRestClientCoinFuturesApi : RestApiClient, IBinanceRestClientCoinFuturesApi, IFuturesClient
     {
         #region fields 
-        internal new readonly BinanceRestOptions Options;
+        /// <inheritdoc />
+        public new BinanceRestApiOptions ApiOptions => (BinanceRestApiOptions)base.ApiOptions;
+        /// <inheritdoc />
+        public new BinanceRestOptions ClientOptions => (BinanceRestOptions)base.ClientOptions;
 
-        internal BinanceFuturesCoinExchangeInfo? ExchangeInfo;
-        internal DateTime? LastExchangeInfoUpdate;
+        internal BinanceFuturesCoinExchangeInfo? _exchangeInfo;
+        internal DateTime? _lastExchangeInfoUpdate;
 
-        internal static TimeSyncState TimeSyncState = new TimeSyncState("Coin Futures Api");
+        internal static TimeSyncState _timeSyncState = new TimeSyncState("Coin Futures Api");
 
         #endregion
 
@@ -58,8 +61,6 @@ namespace Binance.Net.Clients.CoinFuturesApi
         internal BinanceRestClientCoinFuturesApi(ILogger logger, HttpClient? httpClient, BinanceRestOptions options)
             : base(logger, httpClient, options.Environment.CoinFuturesRestAddress!, options, options.CoinFuturesOptions)
         {
-            Options = options;
-
             Account = new BinanceRestClientCoinFuturesApiAccount(this);
             ExchangeData = new BinanceRestClientCoinFuturesApiExchangeData(logger, this);
             Trading = new BinanceRestClientCoinFuturesApiTrading(logger, this);
@@ -91,16 +92,16 @@ namespace Binance.Net.Clients.CoinFuturesApi
             var outputPrice = price;
             var outputStopPrice = stopPrice;
 
-            if (Options.CoinFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.None)
+            if (ApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.None)
                 return BinanceTradeRuleResult.CreatePassed(outputQuantity, outputQuoteQuantity, outputPrice, outputStopPrice);
 
-            if (ExchangeInfo == null || LastExchangeInfoUpdate == null || (DateTime.UtcNow - LastExchangeInfoUpdate.Value).TotalMinutes > Options.CoinFuturesOptions.TradeRulesUpdateInterval.TotalMinutes)
+            if (_exchangeInfo == null || _lastExchangeInfoUpdate == null || (DateTime.UtcNow - _lastExchangeInfoUpdate.Value).TotalMinutes > ApiOptions.TradeRulesUpdateInterval.TotalMinutes)
                 await ExchangeData.GetExchangeInfoAsync(ct).ConfigureAwait(false);
 
-            if (ExchangeInfo == null)
+            if (_exchangeInfo == null)
                 return BinanceTradeRuleResult.CreateFailed("Unable to retrieve trading rules, validation failed");
 
-            var symbolData = ExchangeInfo.Symbols.SingleOrDefault(s => string.Equals(s.Name, symbol, StringComparison.CurrentCultureIgnoreCase));
+            var symbolData = _exchangeInfo.Symbols.SingleOrDefault(s => string.Equals(s.Name, symbol, StringComparison.CurrentCultureIgnoreCase));
             if (symbolData == null)
                 return BinanceTradeRuleResult.CreateFailed($"Trade rules check failed: Symbol {symbol} not found");
 
@@ -127,7 +128,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                     outputQuantity = BinanceHelpers.ClampQuantity(minQty.Value, maxQty!.Value, stepSize!.Value, quantity.Value);
                     if (outputQuantity != quantity.Value)
                     {
-                        if (Options.CoinFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                        if (ApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                         {
                             return BinanceTradeRuleResult.CreateFailed($"Trade rules check failed: LotSize filter failed. Original quantity: {quantity}, Closest allowed: {outputQuantity}");
                         }
@@ -141,7 +142,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
             {
                 if (quoteQuantity < symbolData.MinNotionalFilter.MinNotional)
                 {
-                    if (Options.CoinFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                    if (ApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                         return BinanceTradeRuleResult.CreateFailed(
                             $"Trade rules check failed: MinNotional filter failed. Order value: {quoteQuantity}, minimal order value: {symbolData.MinNotionalFilter.MinNotional}");
 
@@ -160,7 +161,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                     outputPrice = BinanceHelpers.ClampPrice(symbolData.PriceFilter.MinPrice, symbolData.PriceFilter.MaxPrice, price.Value);
                     if (outputPrice != price)
                     {
-                        if (Options.CoinFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                        if (ApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                             return BinanceTradeRuleResult.CreateFailed($"Trade rules check failed: Price filter max/min failed. Original price: {price}, Closest allowed: {outputPrice}");
 
                         _logger.Log(LogLevel.Information, $"price clamped from {price} to {outputPrice}");
@@ -172,7 +173,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                             symbolData.PriceFilter.MaxPrice, stopPrice.Value);
                         if (outputStopPrice != stopPrice)
                         {
-                            if (Options.CoinFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                            if (ApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                                 return BinanceTradeRuleResult.CreateFailed(
                                     $"Trade rules check failed: Stop price filter max/min failed. Original stop price: {stopPrice}, Closest allowed: {outputStopPrice}");
 
@@ -188,7 +189,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                     outputPrice = BinanceHelpers.FloorPrice(symbolData.PriceFilter.TickSize, price.Value);
                     if (outputPrice != beforePrice)
                     {
-                        if (Options.CoinFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                        if (ApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                             return BinanceTradeRuleResult.CreateFailed($"Trade rules check failed: Price filter tick failed. Original price: {price}, Closest allowed: {outputPrice}");
 
                         _logger.Log(LogLevel.Information, $"price rounded from {beforePrice} to {outputPrice}");
@@ -200,7 +201,7 @@ namespace Binance.Net.Clients.CoinFuturesApi
                         outputStopPrice = BinanceHelpers.FloorPrice(symbolData.PriceFilter.TickSize, stopPrice.Value);
                         if (outputStopPrice != beforeStopPrice)
                         {
-                            if (Options.CoinFuturesOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
+                            if (ApiOptions.TradeRulesBehaviour == TradeRulesBehaviour.ThrowError)
                                 return BinanceTradeRuleResult.CreateFailed(
                                     $"Trade rules check failed: Stop price filter tick failed. Original stop price: {stopPrice}, Closest allowed: {outputStopPrice}");
 
@@ -219,10 +220,10 @@ namespace Binance.Net.Clients.CoinFuturesApi
             ArrayParametersSerialization? arraySerialization = null, int weight = 1, bool ignoreRateLimit = false) where T : class
         {
             var result = await SendRequestAsync<T>(uri, method, cancellationToken, parameters, signed, postPosition, arraySerialization, weight, ignoreRatelimit: ignoreRateLimit).ConfigureAwait(false);
-            if (!result && result.Error!.Code == -1021 && Options.CoinFuturesOptions.AutoTimestamp)
+            if (!result && result.Error!.Code == -1021 && ApiOptions.AutoTimestamp)
             {
                 _logger.Log(LogLevel.Debug, "Received Invalid Timestamp error, triggering new time sync");
-                TimeSyncState.LastSyncTime = DateTime.MinValue;
+                _timeSyncState.LastSyncTime = DateTime.MinValue;
             }
             return result;
         }
@@ -233,11 +234,11 @@ namespace Binance.Net.Clients.CoinFuturesApi
 
         /// <inheritdoc />
         public override TimeSyncInfo? GetTimeSyncInfo()
-            => new TimeSyncInfo(_logger, Options.CoinFuturesOptions.AutoTimestamp, Options.CoinFuturesOptions.TimestampRecalculationInterval, TimeSyncState);
+            => new TimeSyncInfo(_logger, ApiOptions.AutoTimestamp, ApiOptions.TimestampRecalculationInterval, _timeSyncState);
 
         /// <inheritdoc />
         public override TimeSpan? GetTimeOffset()
-            => TimeSyncState.TimeOffset;
+            => _timeSyncState.TimeOffset;
 
         /// <inheritdoc />
         public IFuturesClient CommonFuturesClient => this;

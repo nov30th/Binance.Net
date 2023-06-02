@@ -148,8 +148,7 @@ namespace Binance.Net.UnitTests
             var authProvider = new BinanceAuthenticationProvider(new BinanceApiCredentials("TestKey", "TestSecret"));
 
             // assert
-            Assert.AreEqual(authProvider.Credentials.Key.GetString(), "TestKey");
-            Assert.AreEqual(authProvider.Credentials.Secret.GetString(), "TestSecret");
+            Assert.AreEqual(authProvider.GetApiKey(), "TestKey");
         }
 
         [Test]

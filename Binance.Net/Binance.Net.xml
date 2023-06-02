@@ -228,6 +228,12 @@
         <member name="T:Binance.Net.Clients.CoinFuturesApi.BinanceRestClientCoinFuturesApi">
             <inheritdoc cref="T:Binance.Net.Interfaces.Clients.CoinFuturesApi.IBinanceRestClientCoinFuturesApi" />
         </member>
+        <member name="P:Binance.Net.Clients.CoinFuturesApi.BinanceRestClientCoinFuturesApi.ApiOptions">
+            <inheritdoc />
+        </member>
+        <member name="P:Binance.Net.Clients.CoinFuturesApi.BinanceRestClientCoinFuturesApi.ClientOptions">
+            <inheritdoc />
+        </member>
         <member name="P:Binance.Net.Clients.CoinFuturesApi.BinanceRestClientCoinFuturesApi.Account">
             <inheritdoc />
         </member>
@@ -570,6 +576,12 @@
         </member>
         <member name="T:Binance.Net.Clients.GeneralApi.BinanceRestClientGeneralApi">
             <inheritdoc cref="T:Binance.Net.Interfaces.Clients.GeneralApi.IBinanceRestClientGeneralApi" />
+        </member>
+        <member name="P:Binance.Net.Clients.GeneralApi.BinanceRestClientGeneralApi.ApiOptions">
+            <inheritdoc />
+        </member>
+        <member name="P:Binance.Net.Clients.GeneralApi.BinanceRestClientGeneralApi.ClientOptions">
+            <inheritdoc />
         </member>
         <member name="P:Binance.Net.Clients.GeneralApi.BinanceRestClientGeneralApi.Brokerage">
             <inheritdoc />
@@ -951,6 +963,12 @@
         </member>
         <member name="T:Binance.Net.Clients.SpotApi.BinanceRestClientSpotApi">
             <inheritdoc cref="T:Binance.Net.Interfaces.Clients.SpotApi.IBinanceRestClientSpotApi" />
+        </member>
+        <member name="P:Binance.Net.Clients.SpotApi.BinanceRestClientSpotApi.ApiOptions">
+            <inheritdoc />
+        </member>
+        <member name="P:Binance.Net.Clients.SpotApi.BinanceRestClientSpotApi.ClientOptions">
+            <inheritdoc />
         </member>
         <member name="P:Binance.Net.Clients.SpotApi.BinanceRestClientSpotApi.Account">
             <inheritdoc />
@@ -1487,6 +1505,12 @@
         <member name="T:Binance.Net.Clients.SpotApi.BinanceSocketClientSpotApi">
             <inheritdoc />
         </member>
+        <member name="P:Binance.Net.Clients.SpotApi.BinanceSocketClientSpotApi.ClientOptions">
+            <inheritdoc />
+        </member>
+        <member name="P:Binance.Net.Clients.SpotApi.BinanceSocketClientSpotApi.ApiOptions">
+            <inheritdoc />
+        </member>
         <member name="P:Binance.Net.Clients.SpotApi.BinanceSocketClientSpotApi.Account">
             <inheritdoc />
         </member>
@@ -1708,6 +1732,12 @@
         </member>
         <member name="T:Binance.Net.Clients.UsdFuturesApi.BinanceRestClientUsdFuturesApi">
             <inheritdoc cref="T:Binance.Net.Interfaces.Clients.UsdFuturesApi.IBinanceRestClientUsdFuturesApi" />
+        </member>
+        <member name="P:Binance.Net.Clients.UsdFuturesApi.BinanceRestClientUsdFuturesApi.ApiOptions">
+            <inheritdoc />
+        </member>
+        <member name="P:Binance.Net.Clients.UsdFuturesApi.BinanceRestClientUsdFuturesApi.ClientOptions">
+            <inheritdoc />
         </member>
         <member name="P:Binance.Net.Clients.UsdFuturesApi.BinanceRestClientUsdFuturesApi.Account">
             <inheritdoc />
@@ -24826,9 +24856,6 @@
             Options for Binance Rest API
             </summary>
         </member>
-        <member name="P:Binance.Net.Objects.Options.BinanceRestApiOptions.ApiCredentials">
-            <inheritdoc />
-        </member>
         <member name="P:Binance.Net.Objects.Options.BinanceRestApiOptions.TimestampOffset">
             <summary>
             A manual offset for the timestamp. Should only be used if AutoTimestamp and regular time synchronization on the OS is not reliable enough
@@ -24859,9 +24886,6 @@
             The default receive window for requests
             </summary>
         </member>
-        <member name="P:Binance.Net.Objects.Options.BinanceRestOptions.ApiCredentials">
-            <inheritdoc />
-        </member>
         <member name="P:Binance.Net.Objects.Options.BinanceRestOptions.SpotOptions">
             <summary>
             Spot API options
@@ -24882,9 +24906,6 @@
             Options for Binance Socket API
             </summary>
         </member>
-        <member name="P:Binance.Net.Objects.Options.BinanceSocketApiOptions.ApiCredentials">
-            <inheritdoc />
-        </member>
         <member name="P:Binance.Net.Objects.Options.BinanceSocketApiOptions.TradeRulesBehaviour">
             <summary>
             Whether to check the trade rules when placing new orders and what to do if the trade isn't valid
@@ -24904,9 +24925,6 @@
             <summary>
             Default options for new clients
             </summary>
-        </member>
-        <member name="P:Binance.Net.Objects.Options.BinanceSocketOptions.ApiCredentials">
-            <inheritdoc />
         </member>
         <member name="P:Binance.Net.Objects.Options.BinanceSocketOptions.SpotOptions">
             <summary>

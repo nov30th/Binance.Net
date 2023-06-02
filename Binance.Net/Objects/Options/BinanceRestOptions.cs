@@ -10,7 +10,7 @@ namespace Binance.Net.Objects.Options
     /// <summary>
     /// Options for the BinanceRestClient
     /// </summary>
-    public class BinanceRestOptions : RestExchangeOptions<BinanceEnvironment>
+    public class BinanceRestOptions : RestExchangeOptions<BinanceEnvironment, BinanceApiCredentials>
     {
         /// <summary>
         /// Default options for new clients
@@ -25,13 +25,6 @@ namespace Binance.Net.Objects.Options
         /// The default receive window for requests
         /// </summary>
         public TimeSpan ReceiveWindow { get; set; } = TimeSpan.FromSeconds(5);
-
-        /// <inheritdoc />
-        public new BinanceApiCredentials? ApiCredentials
-        {
-            get => (BinanceApiCredentials?)base.ApiCredentials;
-            set => base.ApiCredentials = value;
-        }
 
         /// <summary>
         /// Spot API options

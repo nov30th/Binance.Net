@@ -82,8 +82,8 @@ namespace Binance.Net.Clients.SpotApi
             if (!result)
                 return result;
 
-            _client.ExchangeInfo = result.Data.Result;
-            _client.LastExchangeInfoUpdate = DateTime.UtcNow;
+            _client._exchangeInfo = result.Data.Result;
+            _client._lastExchangeInfoUpdate = DateTime.UtcNow;
             _logger.Log(LogLevel.Information, "Trade rules updated");
             return result;
         }
